@@ -1,0 +1,15 @@
+#executables and compiler stuff
+levelup
+*.o
+#ENSDF data files
+ensdf.*
+#files generated when testing program
+list
+*tmpdatafile*
+#data file types
+*.mca
+*.spe
+*.root
+#temporary files from text editors
+*.save
+*~
