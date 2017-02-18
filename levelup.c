@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 			readENSDFFile(fileName,gd); //grab data from the ENSDF file (see parse_ENSDF.c)
 		}
 	printf("Data imported for %i nuclei.\n",gd->numNucl);
+	printf("Generating cascade data.\n");
+	generateCascadeData(gd);
 
   return 0; //great success
 }

@@ -3,17 +3,38 @@
 int fudgeNumbers(double num1, double num2)
 {
   double fudgeFactor = 2.;
-  if(abs(num1-num2)<=fudgeFactor)
+  //printf("val: %f\n",fabs(num1-num2));
+  if(fabs(num1-num2)<=fudgeFactor)
     return 1;
   else
     return 0;
 }
 
+void generateCascadeData(gdata *gd)
+{
+  int i,j,k,l;
+  
+  //generate gamma cascade lists
+	if(gd->numNucl>=0) //check that indices are valid
+	  for(i=0;i<gd->numNucl;i++)
+		  if(gd->nuclData[i].numLevels>=0) //check that indices are valid
+			  for(j=0;j<gd->nuclData[i].numLevels;j++)
+			    for(k=0;k<gd->nuclData[i].levels[j].numGammas;k++)
+			      for(l=0;l<j;l++)
+				      {
+				        //check whether the level decays to another level
+				        double trialLevelE = gd->nuclData[i].levels[j].energy - gd->nuclData[i].levels[j].gamma_energies[k];
+				        if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy)==1)
+				          {
+				            printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+				          }
+				      }
+}
+
 //set initial databae values prior to importing data
 void initialize_database(gdata * gd) 
 {
-	int i = 0;
-	int j = 0;
+	int i,j;
 	gd->numNucl = -1;
 	for(i=0;i<MAXNUMNUCL;i++)
 		{
@@ -27,8 +48,6 @@ void initialize_database(gdata * gd)
 //function reads parameter files for the topspek code
 void readENSDFFile(const char * fileName, gdata * gd) 
 {
-
-  //int i;
 
   FILE *config;
   char *tok;
@@ -112,16 +131,10 @@ void readENSDFFile(const char * fileName, gdata * gd)
 										    printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
 											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas++;
 											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_energies[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[2]);
-											
-											
-											
-											  //add gamma to cascade if neccessary
-											  /*for(i=0;i<gd->nuclData[gd->numNucl].numLevels-1;i++)
-											    {
-											      //check whether the level decays to another level
-											      if(fudgeNumbers(gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy, gd->nuclData[gd->numNucl].levels[i].energy)==1)
-											    }*/
+											  
 										  }
+										  
+					
 					
 					
 					//if neccesary, increment which subsection we're on
