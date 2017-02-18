@@ -25,6 +25,7 @@ typedef struct
 {
   char sp[10]; //spin parity of the level
   double energy; //level energy in keV
+  int numGammas; //number of gamma rays in this level
   double gamma_energies[MAXGAMMASPERLEVEL];
 }gamma_level; //an individual excited level
 
