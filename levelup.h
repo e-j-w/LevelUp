@@ -9,7 +9,7 @@
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory
 #define MAXCASCDELENGTH 10
-#define MAXCASCDESPERNUCL 20
+#define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXLEVELSPERNUCL 50
 #define MAXNUMNUCL 5000
@@ -17,8 +17,8 @@
 //structures
 typedef struct
 {
-  int numGammas; //number of steps in the cascade
-  double energies[MAXCASCDELENGTH]; //energies of the gammas in the cascade in keV
+  int numLevels; //number of steps in the cascade
+  double energies[MAXCASCDELENGTH]; //energies of the levels in the cascade in keV
 }gamma_cascade; //an individual gamma cascade
 
 typedef struct
