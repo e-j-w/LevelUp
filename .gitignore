@@ -3,6 +3,7 @@ levelup
 *.o
 #ENSDF data files
 ensdf.*
+ensdf_db
 #files generated when testing program
 list
 *tmpdatafile*

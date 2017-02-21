@@ -12,4 +12,6 @@ Maintainer: Jonathan Williams
 
 ## How to Install
 
-The program doesn't exist yet!
+Use 'make' to compile.  To run the program from anywhere, move the resulting 'levelup' executable to any directory under your $PATH environment variable.
+
+Tested using gcc and GNU make on Ubuntu 14.04.  The code is self-contained and should work on more or less any Linux distro.

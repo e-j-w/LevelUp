@@ -1,5 +1,61 @@
 #include "parse_ENSDF.h"
 
+int nameToNuclIndex(const char * name, gdata *gd)
+{
+	int i;
+	for(i=0;i<gd->numNucl;i++)
+		if(strcmp(gd->nuclData[i].nuclName,name)==0)
+			return i;
+			
+	return -1;//negative value indicates failure
+}
+
+void showCascadeData(int nucl, gdata *gd)
+{
+	//dump cascade data
+	int m,n;
+	if(nucl<MAXNUMNUCL)
+		if(gd->nuclData[nucl].numCascades>0)
+			{
+				for(m=0;m<gd->nuclData[nucl].numCascades;m++)
+					{
+						printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
+						for(n=0;n<gd->nuclData[nucl].cascades[m].numLevels;n++)
+							printf("%i      %f\n",n+1,gd->nuclData[nucl].cascades[m].energies[n]);
+					}
+				//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+					//getc(stdin);
+			}
+}
+
+void showNuclName(gdata *gd)
+{
+	int i;
+	printf("%s",gd->nuclData[0].nuclName);
+	for(i=1;i<gd->numNucl;i++)
+		printf(", %s",gd->nuclData[i].nuclName);
+		printf("\n");
+}
+
+int strTokCmp(const char * str, const char * cmp, int pos)
+{
+	char line[256];
+	int i=0;
+	char *tok;
+	strcpy(line,str); //store the entire line
+	tok=strtok (line," ");
+	while(i<pos)
+		if (tok != NULL)
+			{
+				tok = strtok (NULL, " ");
+				if(tok!=NULL)
+					{
+						i++;
+					}
+			}
+	return strcmp(tok,cmp);
+}
+
 //returns true if two numbers are equal to within some fudge factor
 int fudgeNumbers(double num1, double num2, double fudgeFactor)
 {
@@ -123,7 +179,7 @@ void generateCascadeData(gdata *gd)
 						    }
 						    
 				//dump cascade data
-				if(gd->nuclData[i].numCascades>0)
+				/*if(gd->nuclData[i].numCascades>0)
 					{
 						printf("Cascades generated for nucleus: %s\n",gd->nuclData[i].nuclName);
 						for(m=0;m<gd->nuclData[i].numCascades;m++)
@@ -134,7 +190,7 @@ void generateCascadeData(gdata *gd)
 							}
 						//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
 							//getc(stdin);
-			  	}
+			  	}*/
 			}
 }
 
@@ -197,12 +253,12 @@ void readENSDFFile(const char * fileName, gdata * gd)
 					
 					//increment the nucleus if a new nucleus is found
 					if(strcmp(val[1],"ADOPTED")==0)
-						if(strcmp(val[3],"GAMMAS")==0)
+						if((strcmp(val[2],"LEVELS")==0)||(strcmp(val[2],"LEVELS,")==0))
 							if(gd->numNucl<MAXNUMNUCL)
 								{
 									gd->numNucl++;
 									subSec=0; //we're at the beginning of the entry for this nucleus 
-									printf("Adding gamma data for nucleus %s\n",val[0]);
+									//printf("Adding gamma data for nucleus %s\n",val[0]);
 									strcpy(gd->nuclData[gd->numNucl].nuclName,val[0]);
 								}
 							
@@ -213,7 +269,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
 								if(gd->nuclData[gd->numNucl].numLevels<MAXLEVELSPERNUCL)
 									if(strcmp(val[1],"L")==0)
 										{
-										  printf("Found gamma level at %f keV.\n",atof(val[2]));
+										  //printf("Found gamma level at %f keV.\n",atof(val[2]));
 											gd->nuclData[gd->numNucl].numLevels++;
 											gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=atof(val[2]);
 											
@@ -235,7 +291,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
 								  if(gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
 									  if(strcmp(val[1],"G")==0)
 										  {
-										    printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
+										    //printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
 										    gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_energies[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[2]);
 											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas++;
 											  
