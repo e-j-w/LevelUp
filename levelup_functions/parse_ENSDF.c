@@ -1,44 +1,9 @@
 #include "parse_ENSDF.h"
 
-int nameToNuclIndex(const char * name, gdata *gd)
-{
-	int i;
-	for(i=0;i<gd->numNucl;i++)
-		if(strcmp(gd->nuclData[i].nuclName,name)==0)
-			return i;
-			
-	return -1;//negative value indicates failure
-}
-
-void showCascadeData(int nucl, gdata *gd)
-{
-	//dump cascade data
-	int m,n;
-	if(nucl<MAXNUMNUCL)
-		if(gd->nuclData[nucl].numCascades>0)
-			{
-				for(m=0;m<gd->nuclData[nucl].numCascades;m++)
-					{
-						printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
-						for(n=0;n<gd->nuclData[nucl].cascades[m].numLevels;n++)
-							printf("%i      %f\n",n+1,gd->nuclData[nucl].cascades[m].energies[n]);
-					}
-				//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
-					//getc(stdin);
-			}
-}
-
-void showNuclName(gdata *gd)
-{
-	int i;
-	printf("%s",gd->nuclData[0].nuclName);
-	for(i=1;i<gd->numNucl;i++)
-		printf(", %s",gd->nuclData[i].nuclName);
-		printf("\n");
-}
-
 int strTokCmp(const char * str, const char * cmp, int pos)
 {
+	if(strcmp(str,"")==0)
+		return(strcmp(str,cmp));
 	char line[256];
 	int i=0;
 	char *tok;

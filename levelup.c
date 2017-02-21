@@ -2,6 +2,7 @@
 #include "levelup.h"
 //functions and logic
 #include "parse_ENSDF.c"
+#include "db_ops.c"
 
 int main(int argc, char *argv[])
 {
@@ -48,6 +49,11 @@ int main(int argc, char *argv[])
 			generateCascadeData(gd);
 			
 			//write the database to disk
+			if(gd->numNucl<=0)
+				{
+					printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
+					exit(-1);
+				}
 			printf("Database generated.  Writing to disk...\n");
 			strcpy(fileName,"");
 			strcat(fileName,getenv("ENSDF"));
@@ -85,11 +91,13 @@ int main(int argc, char *argv[])
   				printf("Command list:\n");
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
   				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
+  				printf("  lev NUCL - prints level data for the specified nucleus\n");
+  				printf("             (NUCL is the nucleus name, eg. '68SE')\n");
   				printf("  listnuc - list names of nuclei in the ENSDF database\n");
   				printf("  help - list commands\n");
   				printf("  exit - exit the program\n");
   			}
-  		else if(strcmp(cmd,"exit")==0)
+  		else if((strcmp(cmd,"exit")==0)||(strcmp(cmd,"quit")==0))
   			{
   				printf("Exiting...\n");
   				exit(0);
@@ -108,9 +116,27 @@ int main(int argc, char *argv[])
   				else
   					printf("Unknown nucleus: %s\n",tok);
   			}
+  		else if(strTokCmp(cmd,"lev",0)==0)
+  			{
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					tok = strtok (NULL, " ");//read the 2nd entry in the command
+					int nucl=nameToNuclIndex(tok,gd);
+					if ((tok != NULL) && (nucl>=0))
+						{
+  						printf("Printing level data for nucleus %s.\n",tok);
+  						showLevelData(nucl,gd);
+  					}
+  				else
+  					printf("Unknown nucleus: %s\n",tok);
+  			}
   		else if(strcmp(cmd,"listnuc")==0)
   			{
-  				showNuclName(gd);
+  				showNuclNames(gd);
+  			}
+  		else if(strcmp(cmd,"")==0)
+  			{
+  				//do nothing
   			}
   		else
   			{

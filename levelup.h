@@ -35,7 +35,7 @@ typedef struct
 	int N; //neutrons in nucleus
 	int Z; //protons in nucleus
 	int numLevels; //number of excited levels in this nucleus
-	gamma_level levels[MAXLEVELSPERNUCL]; //cascades belonging to the nucleus
+	gamma_level levels[MAXLEVELSPERNUCL]; //levels belonging to the nucleus
 	int numCascades; //number of cascades stored for this nucleus
 	gamma_cascade cascades[MAXCASCDESPERNUCL]; //cascades belonging to the nucleus
 }nucl; //gamma data for a given nucleus
