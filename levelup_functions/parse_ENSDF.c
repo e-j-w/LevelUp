@@ -1,9 +1,8 @@
 #include "parse_ENSDF.h"
 
 //returns true if two numbers are equal to within some fudge factor
-int fudgeNumbers(double num1, double num2)
+int fudgeNumbers(double num1, double num2, double fudgeFactor)
 {
-  double fudgeFactor = 2.;
   //printf("val: %f\n",fabs(num1-num2));
   if(fabs(num1-num2)<=fudgeFactor)
     return 1;
@@ -45,31 +44,34 @@ void generateCascadeData(gdata *gd)
 	if(gd->numNucl>=0) //check that indices are valid
 	  for(i=0;i<gd->numNucl;i++)
 	  	{
+	  		gd->nuclData[i].numCascades=0;//initialize properly
 				if(gd->nuclData[i].numLevels>=0) //check that indices are valid
 					for(j=0;j<gd->nuclData[i].numLevels;j++)
 					  for(k=0;k<gd->nuclData[i].levels[j].numGammas;k++)
-					    for(l=0;l<j;l++)
-						    {
-						      //check whether the level decays to another level
-						      double trialLevelE = gd->nuclData[i].levels[j].energy - gd->nuclData[i].levels[j].gamma_energies[k];
-						      if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy)==1)
+					  	{
+					  		//check whether the level decays to another level
+					  		double trialLevelE = gd->nuclData[i].levels[j].energy - gd->nuclData[i].levels[j].gamma_energies[k];
+					    	for(l=0;l<j;l++)
+						      if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy, 2.)==1)
 						        {
 						        
-						        	printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+						        	//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+						        	//printf("Number of cascades: %i\n",gd->nuclData[i].numCascades);
 						        
 						          append=0;
 						          //see if we can add the level to an existing cascade
 						          for(m=0;m<gd->nuclData[i].numCascades;m++)
 						          	if(m<MAXCASCDESPERNUCL)
-						          		if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
-											    	{
-											    		printf("Adding to cascade %i.\n",m+1);
-											    		//add level to existing cascade
-											    		gd->nuclData[i].cascades[m].energies[gd->nuclData[i].cascades[m].numLevels] = gd->nuclData[i].levels[j].energy;
-											    		gd->nuclData[i].cascades[m].numLevels++;
-											    		append=1;
-											    		break;
-											    	}
+						          		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
+								        		if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
+													  	{
+													  		//printf("Adding to cascade %i.\n",m+1);
+													  		//add level to existing cascade
+													  		gd->nuclData[i].cascades[m].energies[gd->nuclData[i].cascades[m].numLevels] = gd->nuclData[i].levels[j].energy;
+													  		gd->nuclData[i].cascades[m].numLevels++;
+													  		append=1;
+													  		break;
+													  	}
 											if(append==0)
 												{
 													//see if we can make a new cascade by copying part of an older one
@@ -79,7 +81,7 @@ void generateCascadeData(gdata *gd)
 																ind=levelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy);
 								        				if(ind>=0)
 								        					{
-								        						printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
+								        						//printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
 								        						append=1;
 										      					if((ind+2)<MAXCASCDELENGTH)//verify that there is room for a new level
 																			{
@@ -101,6 +103,7 @@ void generateCascadeData(gdata *gd)
 													//make a brand new cascade
 													if((gd->nuclData[i].numCascades+1)<MAXCASCDESPERNUCL)//verify that there is room for a new cascade
 														{
+															//printf("Creating new cascade.\n");
 															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=2;
 															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[0]=gd->nuclData[i].levels[l].energy;
 															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[1]=gd->nuclData[i].levels[j].energy;
@@ -108,18 +111,30 @@ void generateCascadeData(gdata *gd)
 														}
 												}
 											
-											
 						        }
+						      /*else
+						      	{
+						      		if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+						      			{
+										  		printf("j=%i, k=%i, l=%i, numLevels=%i\n",j,k,l,gd->nuclData[i].numLevels);
+										  		printf("-->%s: No cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+						      			}
+						      	}*/
 						    }
 						    
 				//dump cascade data
-			  for(m=0;m<gd->nuclData[i].numCascades;m++)
-			  	{
-			  		printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
-			  		for(n=0;n<gd->nuclData[i].cascades[m].numLevels;n++)
-			  			printf("%i      %f\n",n+1,gd->nuclData[i].cascades[m].energies[n]);
+				if(gd->nuclData[i].numCascades>0)
+					{
+						printf("Cascades generated for nucleus: %s\n",gd->nuclData[i].nuclName);
+						for(m=0;m<gd->nuclData[i].numCascades;m++)
+							{
+								printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
+								for(n=0;n<gd->nuclData[i].cascades[m].numLevels;n++)
+									printf("%i      %f\n",n+1,gd->nuclData[i].cascades[m].energies[n]);
+							}
+						//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+							//getc(stdin);
 			  	}
-			  //getc(stdin);
 			}
 }
 
@@ -132,7 +147,7 @@ void initialize_database(gdata * gd)
 		{
 			gd->nuclData[i].numLevels = -1;
 			for(j=0;j<MAXLEVELSPERNUCL;j++)
-			  gd->nuclData[i].levels[j].numGammas = -1;
+			  gd->nuclData[i].levels[j].numGammas = 0;
 		}
 }
 
@@ -221,8 +236,8 @@ void readENSDFFile(const char * fileName, gdata * gd)
 									  if(strcmp(val[1],"G")==0)
 										  {
 										    printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
+										    gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_energies[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[2]);
 											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas++;
-											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_energies[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[2]);
 											  
 										  }
 										  
