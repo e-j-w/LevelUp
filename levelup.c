@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	
 	
 	//process the ENSDF database file
-	char fileName[256],str[8];
+	char fileName[256];
 	int i;
 	strcpy(fileName,"");
 	strcat(fileName,getenv("ENSDF"));
@@ -30,40 +30,7 @@ int main(int argc, char *argv[])
 	if((db=fopen(fileName,"r"))==NULL)
 		{
 			printf("ENSDF database file not found, rebuilding database...\n");
-			for(i=1;i<200;i++)
-				{
-					strcpy(fileName,"");
-					strcat(fileName,getenv("ENSDF"));
-					if(i<10)
-						strcat(fileName,"ensdf.00");
-					else if(i<100)
-						strcat(fileName,"ensdf.0");
-					else
-						strcat(fileName,"ensdf.");
-					sprintf(str,"%i",i);
-					strcat(fileName,str);
-					readENSDFFile(fileName,gd); //grab data from the ENSDF file (see parse_ENSDF.c)
-				}
-			printf("Data imported for %i nuclei.\n",gd->numNucl);
-			printf("Generating cascade data.\n");
-			generateCascadeData(gd);
-			
-			//write the database to disk
-			if(gd->numNucl<=0)
-				{
-					printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
-					exit(-1);
-				}
-			printf("Database generated.  Writing to disk...\n");
-			strcpy(fileName,"");
-			strcat(fileName,getenv("ENSDF"));
-			strcat(fileName,"ensdf_db");
-			if((db=fopen(fileName,"w"))==NULL)
-				{
-					printf("ERROR: cannot open the output file '%s'.  Exiting...\n",fileName);
-				}
-			fwrite(gd,sizeof(gdata),1,db);
-			fclose(db);
+			rebuildDatabase(gd,db);
 			db=fopen(fileName,"r");//reopen file for reading
 		}
 	i=fread(gd,sizeof(gdata),1,db);
@@ -75,6 +42,7 @@ int main(int argc, char *argv[])
 		{
 			printf("ERROR: ENSDF database could not be read from file '%s'.  Exiting...\n",fileName);
 		}
+	fclose(db);
 	
 	
 	//process user commands
@@ -94,6 +62,7 @@ int main(int argc, char *argv[])
   				printf("  lev NUCL - prints level data for the specified nucleus\n");
   				printf("             (NUCL is the nucleus name, eg. '68SE')\n");
   				printf("  listnuc - list names of nuclei in the ENSDF database\n");
+  				printf("  rebuild - rebuild the ENSDF database from ENSDF files on disk\n");
   				printf("  help - list commands\n");
   				printf("  exit - exit the program\n");
   			}
@@ -133,6 +102,22 @@ int main(int argc, char *argv[])
   		else if(strcmp(cmd,"listnuc")==0)
   			{
   				showNuclNames(gd);
+  			}
+  		else if(strcmp(cmd,"rebuild")==0)
+  			{
+  				printf("Rebuilding ENSDF database...\n");
+					rebuildDatabase(gd,db);
+					db=fopen(fileName,"r");//reopen file for reading
+					i=fread(gd,sizeof(gdata),1,db);
+					if(i==1)
+						{
+							printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
+						}
+					else
+						{
+							printf("ERROR: ENSDF database could not be read from file '%s'.  Exiting...\n",fileName);
+						}
+					fclose(db);
   			}
   		else if(strcmp(cmd,"")==0)
   			{

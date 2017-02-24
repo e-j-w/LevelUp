@@ -157,23 +157,39 @@ void generateCascadeData(gdata *gd)
 							//getc(stdin);
 			  	}*/
 			}
+	
+	
+	//generate cascade gamma ray energies
+	if(gd->numNucl>=0) //check that indices are valid
+	  for(i=0;i<gd->numNucl;i++)
+	  	for(j=0;j<gd->nuclData[i].numCascades;j++)
+	  		for(k=0;k<gd->nuclData[i].cascades[j].numLevels;k++)
+	  			{
+	  				if(k==0)
+	  					gd->nuclData[i].cascades[j].gammaEnergies[k]=0.;
+	  				else
+	  					gd->nuclData[i].cascades[j].gammaEnergies[k]=gd->nuclData[i].cascades[j].energies[k] - gd->nuclData[i].cascades[j].energies[k-1];
+	  			}
+	
+	
 }
 
 //set initial databae values prior to importing data
 void initialize_database(gdata * gd) 
 {
-	int i,j;
+	int i;
+	
+	memset(gd,0,sizeof(gdata));
+	
 	gd->numNucl = -1;
 	for(i=0;i<MAXNUMNUCL;i++)
 		{
 			gd->nuclData[i].numLevels = -1;
-			for(j=0;j<MAXLEVELSPERNUCL;j++)
-			  gd->nuclData[i].levels[j].numGammas = 0;
 		}
 }
 
 
-//function reads parameter files for the topspek code
+//function to parse ENSDF data files
 void readENSDFFile(const char * fileName, gdata * gd) 
 {
 

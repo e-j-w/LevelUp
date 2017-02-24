@@ -19,9 +19,9 @@ void showCascadeData(int nucl, gdata *gd)
 			{
 				for(m=0;m<gd->nuclData[nucl].numCascades;m++)
 					{
-						printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
+						printf("CASCADE %i:\nStep   Level Energy   Gamma energy\n   #          (keV)          (keV)\n",m+1);
 						for(n=0;n<gd->nuclData[nucl].cascades[m].numLevels;n++)
-							printf("%i      %f\n",n+1,gd->nuclData[nucl].cascades[m].energies[n]);
+							printf("%4i     %10.3f     %10.3f\n",n+1,gd->nuclData[nucl].cascades[m].energies[n],gd->nuclData[nucl].cascades[m].gammaEnergies[n]);
 					}
 				//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
 					//getc(stdin);
@@ -63,4 +63,48 @@ void showNuclNames(gdata *gd)
 	for(i=1;i<gd->numNucl;i++)
 		printf(", %s",gd->nuclData[i].nuclName);
 		printf("\n");
+}
+
+void rebuildDatabase(gdata *gd, FILE *db)
+{
+	int i;
+	char fileName[256],str[8];
+	
+	initialize_database(gd);
+	
+	for(i=1;i<200;i++)
+		{
+			strcpy(fileName,"");
+			strcat(fileName,getenv("ENSDF"));
+			if(i<10)
+				strcat(fileName,"ensdf.00");
+			else if(i<100)
+				strcat(fileName,"ensdf.0");
+			else
+				strcat(fileName,"ensdf.");
+			sprintf(str,"%i",i);
+			strcat(fileName,str);
+			readENSDFFile(fileName,gd); //grab data from the ENSDF file (see parse_ENSDF.c)
+		}
+	printf("Data imported for %i nuclei.\n",gd->numNucl);
+	printf("Generating cascade data.\n");
+	generateCascadeData(gd);
+	
+	//write the database to disk
+	if(gd->numNucl<=0)
+		{
+			printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
+			exit(-1);
+		}
+	printf("Database generated.  Writing to disk...\n");
+	strcpy(fileName,"");
+	strcat(fileName,getenv("ENSDF"));
+	strcat(fileName,"ensdf_db");
+	if((db=fopen(fileName,"w"))==NULL)
+		{
+			printf("ERROR: cannot open the output file '%s'.  Exiting...\n",fileName);
+		}
+	fwrite(gd,sizeof(gdata),1,db);
+	fclose(db);
+	printf("Database rebuild finished.\n");
 }
