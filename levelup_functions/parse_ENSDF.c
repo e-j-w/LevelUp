@@ -96,7 +96,7 @@ void generateCascadeData(gdata *gd)
 											if(append==0)
 												{
 													//see if we can make a new cascade by copying part of an older one
-													if((gd->nuclData[i].numCascades+1)<MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+													if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
 														for(m=0;m<gd->nuclData[i].numCascades;m++)
 															{
 																ind=levelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy);
@@ -122,7 +122,7 @@ void generateCascadeData(gdata *gd)
 											if(append==0)
 												{
 													//make a brand new cascade
-													if((gd->nuclData[i].numCascades+1)<MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+													if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
 														{
 															//printf("Creating new cascade.\n");
 															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=2;
@@ -202,7 +202,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
   //associated with a particlular reaction mechanism
-  int subSec; 
+  int subSec=0; 
   
   //open the file and read all parameters
   if((config=fopen(fileName,"r"))==NULL)
@@ -216,19 +216,26 @@ void readENSDFFile(const char * fileName, gdata * gd)
 				{
 					//sscanf(str,"%s",str1);
 					strcpy(line,str); //store the entire line
-					tok=strtok (str," ");
-					tokPos=0;
-					strcpy(val[tokPos],tok);
-					while (tok != NULL)
-					{
-						tok = strtok (NULL, " ");
-						if(tok!=NULL)
+					if(strcmp(str,"")==0)
+						{
+							subSec++; //empty line, increment which subsection we're on
+						}
+					else
+						{
+							tok=strtok (str," ");
+							tokPos=0;
+							strcpy(val[tokPos],tok);
+							while (tok != NULL)
 							{
-								tokPos++;
-								if(tokPos<MAXNUMVALS)
-									strcpy(val[tokPos],tok);
-								else
-									break;
+								tok = strtok (NULL, " ");
+								if(tok!=NULL)
+									{
+										tokPos++;
+										if(tokPos<MAXNUMVALS)
+											strcpy(val[tokPos],tok);
+										else
+											break;
+									}
 							}
 					}
 					
@@ -246,13 +253,29 @@ void readENSDFFile(const char * fileName, gdata * gd)
 					//add gamma levels
 					if(gd->numNucl>=0) //check that indices are valid
 						if(strcmp(val[0],gd->nuclData[gd->numNucl].nuclName)==0)
-							if(subSec==1)//adopted gamma levels subsection
+							if(subSec==0)//adopted gamma levels subsection
 								if(gd->nuclData[gd->numNucl].numLevels<MAXLEVELSPERNUCL)
 									if(strcmp(val[1],"L")==0)
 										{
+											
 										  //printf("Found gamma level at %f keV.\n",atof(val[2]));
 											gd->nuclData[gd->numNucl].numLevels++;
-											gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=atof(val[2]);
+											double levelE = atof(val[2]);
+											if(gd->nuclData[gd->numNucl].numLevels==0)
+												{
+													//the level energy represents a new level
+													gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=levelE;
+												}
+											else if(levelE>gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels-1].energy)
+												{
+													//the level energy represents a new level
+													gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=levelE;
+												}
+											else
+												{
+													//the level energy is a repeat
+													gd->nuclData[gd->numNucl].numLevels--;
+												}
 											
 											
 											
@@ -268,7 +291,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
 					if(gd->numNucl>=0) //check that indices are valid
 					  if(gd->nuclData[gd->numNucl].numLevels>=0) //check that indices are valid
 						  if(strcmp(val[0],gd->nuclData[gd->numNucl].nuclName)==0)
-							  if(subSec==1)//adopted gamma levels subsection
+							  if(subSec==0)//adopted gamma levels subsection
 								  if(gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
 									  if(strcmp(val[1],"G")==0)
 										  {
@@ -278,16 +301,6 @@ void readENSDFFile(const char * fileName, gdata * gd)
 											  
 										  }
 										  
-					
-					
-					
-					//if neccesary, increment which subsection we're on
-					if(gd->numNucl>=0)
-						if(strcmp(val[0],gd->nuclData[gd->numNucl].nuclName)==0)
-							if(strcmp(val[1],"H")==0)
-								{
-									subSec++;
-								}
 					
 				}
 		}

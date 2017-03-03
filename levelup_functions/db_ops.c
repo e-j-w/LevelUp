@@ -14,6 +14,11 @@ void showCascadeData(int nucl, gdata *gd)
 {
 	//dump cascade data
 	int m,n;
+	
+	printf("Printing cascade data for nucleus %s.  %i cascades found.\n",gd->nuclData[nucl].nuclName,gd->nuclData[nucl].numCascades);
+	if(gd->nuclData[nucl].numCascades>=MAXCASCDESPERNUCL)
+		printf("NOTE: cascade listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXCASCDESPERNUCL in 'levelup.h'.\n");
+	
 	if(nucl<MAXNUMNUCL)
 		if(gd->nuclData[nucl].numCascades>0)
 			{
@@ -32,6 +37,10 @@ void showLevelData(int nucl, gdata *gd)
 {
 	int i,j;
 	double finalEnergy;
+	
+	printf("Printing level data for nucleus %s.  %i levels found.\n",gd->nuclData[nucl].nuclName,gd->nuclData[nucl].numLevels);
+	if(gd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)
+		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
 	printf("Level Energy    Gamma Energy    Final energy\n       (keV)           (keV)           (keV)\n\n");
 	if(nucl<MAXNUMNUCL)

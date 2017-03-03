@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
 	
 	//process the ENSDF database file
 	char fileName[256];
-	int i;
+	int i=0;
+	int j=0;
 	strcpy(fileName,"");
 	strcat(fileName,getenv("ENSDF"));
 	strcat(fileName,"ensdf_db");
@@ -33,14 +34,27 @@ int main(int argc, char *argv[])
 			rebuildDatabase(gd,db);
 			db=fopen(fileName,"r");//reopen file for reading
 		}
-	i=fread(gd,sizeof(gdata),1,db);
-	if(i==1)
-		{
-			printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
-		}
-	else
-		{
-			printf("ERROR: ENSDF database could not be read from file '%s'.  Exiting...\n",fileName);
+	while(i!=1)
+		{	
+			i=fread(gd,sizeof(gdata),1,db);
+			if(i==1)
+				{
+					printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
+				}
+			else
+				{
+					j++;
+					printf("ERROR: ENSDF database could not be read from file '%s'.  Rebuilding (attempt %i)...\n",fileName,j);
+					rebuildDatabase(gd,db);
+					db=fopen(fileName,"r");//reopen file for reading
+					
+				}
+			if(j>3)
+				{
+					printf("ERROR: ENSDF database could not be built.  Exiting...\n");
+					exit(-1);
+				}
+	
 		}
 	fclose(db);
 	
@@ -79,7 +93,6 @@ int main(int argc, char *argv[])
 					int nucl=nameToNuclIndex(tok,gd);
 					if ((tok != NULL) && (nucl>=0))
 						{
-  						printf("Printing cascade data for nucleus %s.\n",tok);
   						showCascadeData(nucl,gd);
   					}
   				else
@@ -93,7 +106,6 @@ int main(int argc, char *argv[])
 					int nucl=nameToNuclIndex(tok,gd);
 					if ((tok != NULL) && (nucl>=0))
 						{
-  						printf("Printing level data for nucleus %s.\n",tok);
   						showLevelData(nucl,gd);
   					}
   				else
@@ -109,13 +121,26 @@ int main(int argc, char *argv[])
 					rebuildDatabase(gd,db);
 					db=fopen(fileName,"r");//reopen file for reading
 					i=fread(gd,sizeof(gdata),1,db);
-					if(i==1)
-						{
-							printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
-						}
-					else
-						{
-							printf("ERROR: ENSDF database could not be read from file '%s'.  Exiting...\n",fileName);
+					while(i!=1)
+						{	
+							i=fread(gd,sizeof(gdata),1,db);
+							if(i==1)
+								{
+									printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
+								}
+							else
+								{
+									j++;
+									printf("ERROR: ENSDF database could not be read from file '%s'.  Rebuilding (attempt %i)...\n",fileName,j);
+									rebuildDatabase(gd,db);
+									db=fopen(fileName,"r");//reopen file for reading
+					
+								}
+							if(j>3)
+								{
+									printf("ERROR: ENSDF database could not be built.  Exiting...\n");
+									exit(-1);
+								}
 						}
 					fclose(db);
   			}
