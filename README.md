@@ -22,4 +22,4 @@ Use `make` to compile.  To run the program from anywhere, move the resulting `le
 
 The environment variable `ENSDF` pointing to a directory containing unzipped ENSDF data files must be defined in order for the program to run.  Running the program without this variable defined will display an error message.
 
-Tested using gcc and GNU make on Ubuntu 14.04.  The code is self-contained and should work on more or less any Linux distro.
+Tested using gcc and GNU make on Ubuntu 14.04 and Arch Linux (as of March 2017).  The code is self-contained and should work on more or less any Linux distro.

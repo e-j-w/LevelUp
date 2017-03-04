@@ -105,8 +105,10 @@ void showNuclNames(gdata *gd)
 	int i;
 	printf("Known nuclei: %s",gd->nuclData[0].nuclName);
 	for(i=1;i<gd->numNucl;i++)
-		printf(", %s",gd->nuclData[i].nuclName);
-		printf("\n");
+		{
+			printf(", %s",gd->nuclData[i].nuclName);
+		}
+	printf("\n");
 }
 
 void rebuildDatabase(gdata *gd, FILE *db)

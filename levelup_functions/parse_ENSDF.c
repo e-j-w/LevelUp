@@ -72,19 +72,19 @@ void generateCascadeData(gdata *gd)
 					  	{
 					  		//check whether the level decays to another level
 					  		double trialLevelE = gd->nuclData[i].levels[j].energy - gd->nuclData[i].levels[j].gamma_energies[k];
-					    	for(l=0;l<j;l++)
-						      if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy, 2.)==1)
-						        {
+							for(l=0;l<j;l++)
+								if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy, 2.)==1)
+									{
 						        
 						        	//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
 						        	//printf("Number of cascades: %i\n",gd->nuclData[i].numCascades);
 						        
-						          append=0;
-						          //see if we can add the level to an existing cascade
-						          for(m=0;m<gd->nuclData[i].numCascades;m++)
-						          	if(m<MAXCASCDESPERNUCL)
-						          		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
-								        		if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
+										append=0;
+										//see if we can add the level to an existing cascade
+										for(m=0;m<gd->nuclData[i].numCascades;m++)
+										  	if(m<MAXCASCDESPERNUCL)
+										  		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
+													if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
 													  	{
 													  		//printf("Adding to cascade %i.\n",m+1);
 													  		//add level to existing cascade
@@ -93,44 +93,44 @@ void generateCascadeData(gdata *gd)
 													  		append=1;
 													  		break;
 													  	}
-											if(append==0)
-												{
-													//see if we can make a new cascade by copying part of an older one
-													if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
-														for(m=0;m<gd->nuclData[i].numCascades;m++)
-															{
-																ind=levelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy);
-								        				if(ind>=0)
-								        					{
-								        						//printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
-								        						append=1;
-										      					if((ind+2)<MAXCASCDELENGTH)//verify that there is room for a new level
-																			{
-																				//copy the cascade
-																				gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=ind+2;
-																				for(n=0;n<=ind;n++)
-																					gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[n]=gd->nuclData[i].cascades[m].energies[n];
-																				//add the new level
-																				gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[ind+1]=gd->nuclData[i].levels[j].energy;
-																				//increment cascade counter
-																				gd->nuclData[i].numCascades++;
-																				break;
-																			}
-																	}
-													  	}
-												}
-											if(append==0)
-												{
-													//make a brand new cascade
-													if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+										if(append==0)
+											{
+												//see if we can make a new cascade by copying part of an older one
+												if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+													for(m=0;m<gd->nuclData[i].numCascades;m++)
 														{
-															//printf("Creating new cascade.\n");
-															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=2;
-															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[0]=gd->nuclData[i].levels[l].energy;
-															gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[1]=gd->nuclData[i].levels[j].energy;
-															gd->nuclData[i].numCascades++;
-														}
-												}
+															ind=levelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy);
+							        				if(ind>=0)
+							        					{
+							        						//printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
+							        						append=1;
+									      					if((ind+2)<MAXCASCDELENGTH)//verify that there is room for a new level
+																		{
+																			//copy the cascade
+																			gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=ind+2;
+																			for(n=0;n<=ind;n++)
+																				gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[n]=gd->nuclData[i].cascades[m].energies[n];
+																			//add the new level
+																			gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[ind+1]=gd->nuclData[i].levels[j].energy;
+																			//increment cascade counter
+																			gd->nuclData[i].numCascades++;
+																			break;
+																		}
+																}
+												  	}
+											}
+										if(append==0)
+											{
+												//make a brand new cascade
+												if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+													{
+														//printf("Creating new cascade.\n");
+														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=2;
+														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[0]=gd->nuclData[i].levels[l].energy;
+														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[1]=gd->nuclData[i].levels[j].energy;
+														gd->nuclData[i].numCascades++;
+													}
+											}
 											
 						        }
 						      /*else
