@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
   				printf("Command list:\n");
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
   				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
+  				printf("  findcasc,fc - find nuclei which match a cascade that you enter\n");
   				printf("  lev NUCL - prints level data for the specified nucleus\n");
   				printf("             (NUCL is the nucleus name, eg. '68SE')\n");
   				printf("  listnuc - list names of nuclei in the ENSDF database\n");
@@ -114,6 +115,43 @@ int main(int argc, char *argv[])
   		else if(strcmp(cmd,"listnuc")==0)
   			{
   				showNuclNames(gd);
+  			}
+  		else if((strcmp(cmd,"findcasc")==0)||(strcmp(cmd,"fc")==0))
+  			{
+  				int validE=1;
+  				gamma_cascade *c=(gamma_cascade*)malloc(sizeof(gamma_cascade));
+  				printf("Enter the number of gammas in the cascade: ");
+  				fgets(cmd,256,stdin);
+  				cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+  				if(atoi(cmd)<=0)
+  					{
+  						validE=0;
+  						printf("Invalid number of gammas.  Returning...\n");
+  					}
+  				else
+  					c->numLevels=atoi(cmd);
+  				if(c->numLevels>MAXCASCDELENGTH)
+  					{
+  						printf("Maximum cascade length (%i) exceeded.  Setting the number of gammas to %i.\n",MAXCASCDELENGTH,MAXCASCDELENGTH);
+  						c->numLevels=MAXCASCDELENGTH;
+  					}
+  				for(i=0;i<c->numLevels;i++)
+  					{
+  						printf("Enter the energy of gamma ray %i [keV]: ",i+1);
+  						fgets(cmd,256,stdin);
+  						cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+  						if(atof(cmd)<=0.)
+  							{
+  								validE=0;
+  								printf("Invalid energy.  Returning...\n");
+  								break;
+  							}
+  						else
+  							c->gammaEnergies[i]=atof(cmd);
+  					}
+  				if(validE==1)
+  					findCascade(c,c->numLevels,gd);
+  				free(c);
   			}
   		else if(strcmp(cmd,"rebuild")==0)
   			{
