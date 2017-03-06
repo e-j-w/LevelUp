@@ -76,6 +76,8 @@ int main(int argc, char *argv[])
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
   				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
   				printf("  lev NUCL - prints level data for the specified nucleus\n");
+  				printf("  ol NUCL1 NUCL2 - finds overlapping gamma rays in the two\n"); 
+  				printf("                   specified nuclei\n");
   				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n");
   				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n");
   				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n");
@@ -113,6 +115,34 @@ int main(int argc, char *argv[])
   					}
   				else
   					printf("Unknown nucleus: %s\n",tok);
+  			}
+  		else if((strTokCmp(cmd,"overlap",0)==0)||(strTokCmp(cmd,"ol",0)==0))
+  			{
+  				int findOL=1;
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					tok = strtok (NULL, " ");//read the 2nd entry in the command
+					int nucl1=nameToNuclIndex(tok,gd);
+					if ((tok == NULL) || (nucl1<0))
+						{
+							printf("Unknown nucleus: %s\n",tok);
+							findOL=0;
+						}
+					if (findOL)
+						{
+							tok = strtok (NULL, " ");//read the 3rd entry in the command
+							int nucl2=nameToNuclIndex(tok,gd);
+							if ((tok == NULL) || (nucl2<0))
+								{
+									printf("Unknown nucleus: %s\n",tok);
+									findOL=0;
+								}
+							if (findOL)
+								{
+									findOverlappingLevels(nucl1,nucl2,gd);
+								}
+						}
+					
   			}
   		else if(strTokCmp(cmd,"nz",0)==0)
   			{

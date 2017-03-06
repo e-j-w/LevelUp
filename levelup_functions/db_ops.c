@@ -68,6 +68,37 @@ void findCascade(gamma_cascade * c, int numToMatch, gdata *gd)
 		printf("Cascade didn't match any nuclei in database.\n");
 }
 
+
+void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
+{
+	int i,j,k,l;
+	int overlapFound=0;
+
+	for(i=0;i<gd->nuclData[nucl1].numLevels;i++)
+		for(j=0;j<gd->nuclData[nucl2].numLevels;j++)
+			for(k=0;k<gd->nuclData[nucl1].levels[i].numGammas;k++)
+				for(l=0;l<gd->nuclData[nucl1].levels[j].numGammas;l++)
+					{
+						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
+							{
+								printf("Overlap at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+								overlapFound++;
+							}
+						else if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
+							{
+								printf("Nearby peaks at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+								overlapFound++;
+							}
+					}
+					
+	if(overlapFound==0)
+		printf("No overlap in gamma ray energies found in the nuclei %s and %s.\n",gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
+	else
+		printf("%i overlapping and/or nearby gamma ray energies found in the nuclei %s and %s.\n",overlapFound,gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
+
+}
+
+
 void showLevelData(int nucl, gdata *gd)
 {
 	int i,j;
