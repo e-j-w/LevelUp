@@ -75,13 +75,13 @@ int main(int argc, char *argv[])
   				printf("Command list:\n");
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
   				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
-  				printf("  findcasc,fc - find nuclei which match a cascade that you enter\n");
   				printf("  lev NUCL - prints level data for the specified nucleus\n");
-  				printf("             (NUCL is the nucleus name, eg. '68SE')\n");
-  				printf("  listnuc - list names of nuclei in the ENSDF database\n");
+  				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n");
+  				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n");
+  				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n");
   				printf("  rebuild - rebuild the ENSDF database from ENSDF files on disk\n");
   				printf("  help - list commands\n");
-  				printf("  exit - exit the program\n");
+  				printf("  exit, quit - exit the program\n");
   			}
   		else if((strcmp(cmd,"exit")==0)||(strcmp(cmd,"quit")==0))
   			{
@@ -114,7 +114,20 @@ int main(int argc, char *argv[])
   				else
   					printf("Unknown nucleus: %s\n",tok);
   			}
-  		else if(strcmp(cmd,"listnuc")==0)
+  		else if(strTokCmp(cmd,"nz",0)==0)
+  			{
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					tok = strtok (NULL, " ");//read the 2nd entry in the command
+					int nucl=nameToNuclIndex(tok,gd);
+					if ((tok != NULL) && (nucl>=0))
+						{
+  						showNZ(nucl,gd);
+  					}
+  				else
+  					printf("Unknown nucleus: %s\n",tok);
+  			}
+  		else if((strcmp(cmd,"listnuc")==0)||(strcmp(cmd,"ln")==0))
   			{
   				showNuclNames(gd);
   			}

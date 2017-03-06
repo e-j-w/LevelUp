@@ -12,7 +12,7 @@
 #define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXLEVELSPERNUCL 50
-#define MAXNUMNUCL 5000
+#define MAXNUMNUCL 3000
 
 //structures
 typedef struct

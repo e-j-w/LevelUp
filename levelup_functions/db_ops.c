@@ -58,7 +58,7 @@ void findCascade(gamma_cascade * c, int numToMatch, gdata *gd)
 				if(numMatching>=numToMatch)
 					{
 						numMatched++;
-						printf("Cascade matches nucleus: %s\n",gd->nuclData[i].nuclName);
+						printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
 						//printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
 						break; //don't print out the same nucleus more than once
 					}
@@ -98,6 +98,11 @@ void showLevelData(int nucl, gdata *gd)
 						printf("                  %10.3f      %10.3f\n",gd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
 					}
 			}
+}
+
+void showNZ(int nucl, gdata *gd)
+{
+	printf("For nucleus %s: N = %i, Z = %i\n",gd->nuclData[nucl].nuclName,gd->nuclData[nucl].N,gd->nuclData[nucl].Z);
 }
 
 void showNuclNames(gdata *gd)
