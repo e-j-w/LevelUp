@@ -6,15 +6,17 @@
 
 int main(int argc, char *argv[])
 {
+
+	printf("\nLevelUp - There Is No Hope\n--------------------------\n\n");
+
 	if(!getenv("ENSDF")) 
 		{
 			printf("\nThe environment variable ENSDF is not set.\nWithout it, this program cannot find the ENSDF data files.  Set the envirnoment variable to point to the directory containing ENSDF data files using the following command (replace the path with the appropriate one):\n\n");
 			printf ("export ENSDF=/path/to/ensdf/\n\n");
 			exit(-1);
 		}
-    
-	FILE *db;
   
+  FILE *db;
   //allocate structures
   gdata *gd=(gdata*)malloc(sizeof(gdata));
   initialize_database(gd);

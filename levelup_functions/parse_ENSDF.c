@@ -75,23 +75,23 @@ void generateCascadeData(gdata *gd)
 							for(l=0;l<j;l++)
 								if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy, 2.)==1)
 									{
-						        
-						        	//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
-						        	//printf("Number of cascades: %i\n",gd->nuclData[i].numCascades);
-						        
+										
+										//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+										//printf("Number of cascades: %i\n",gd->nuclData[i].numCascades);
+											
 										append=0;
-										//see if we can add the level to an existing cascade
+										//see if we can add the level to existing cascade(s)
 										for(m=0;m<gd->nuclData[i].numCascades;m++)
-										  	if(m<MAXCASCDESPERNUCL)
-										  		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
+									  	if(m<MAXCASCDESPERNUCL)
+									  		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
 													if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
+														if(gd->nuclData[i].cascades[m].numLevels+1<=MAXCASCDELENGTH)
 													  	{
 													  		//printf("Adding to cascade %i.\n",m+1);
 													  		//add level to existing cascade
 													  		gd->nuclData[i].cascades[m].energies[gd->nuclData[i].cascades[m].numLevels] = gd->nuclData[i].levels[j].energy;
 													  		gd->nuclData[i].cascades[m].numLevels++;
 													  		append=1;
-													  		break;
 													  	}
 										if(append==0)
 											{
