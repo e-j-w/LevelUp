@@ -14,6 +14,7 @@ Currently implemented features include:
 
 * Listing of levels and gamma rays corresponding to a given nucleus.
 * Listing of gamma-ray cascades corresponding to a given nucleus.
+* Checking for overlapping/nearby gamma-ray energies in two nuclei.
 * Lookup of gamma-ray cascades entered by the user, in order to determine the nucleus from which the cascade originates.
 
 ## How to Install

@@ -73,7 +73,9 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 {
 	int i,j,k,l;
 	int overlapFound=0;
-
+	int nearbyFound=0;
+	
+	printf("\n");
 	for(i=0;i<gd->nuclData[nucl1].numLevels;i++)
 		for(j=0;j<gd->nuclData[nucl2].numLevels;j++)
 			for(k=0;k<gd->nuclData[nucl1].levels[i].numGammas;k++)
@@ -81,20 +83,28 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 					{
 						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
 							{
-								printf("Overlap at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
-								overlapFound++;
-							}
-						else if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
-							{
-								printf("Nearby peaks at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+								printf("Overlap at energies: %15.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
 								overlapFound++;
 							}
 					}
+	printf("\n");
+	for(i=0;i<gd->nuclData[nucl1].numLevels;i++)
+		for(j=0;j<gd->nuclData[nucl2].numLevels;j++)
+			for(k=0;k<gd->nuclData[nucl1].levels[i].numGammas;k++)
+				for(l=0;l<gd->nuclData[nucl1].levels[j].numGammas;l++)
+					{
+						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
+							if(!(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0)))
+								{
+									printf("Nearby peaks at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+									nearbyFound++;
+								}
+					}
 					
-	if(overlapFound==0)
-		printf("No overlap in gamma ray energies found in the nuclei %s and %s.\n",gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
+	if((overlapFound+nearbyFound)==0)
+		printf("\nNo overlap in gamma ray energies found in the nuclei %s and %s.\n",gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
 	else
-		printf("%i overlapping and/or nearby gamma ray energies found in the nuclei %s and %s.\n",overlapFound,gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
+		printf("\n%i overlapping and %i nearby gamma ray energies found in the nuclei %s and %s.\n",overlapFound,nearbyFound,gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
 
 }
 
