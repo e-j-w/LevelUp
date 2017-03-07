@@ -467,7 +467,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
   //open the file and read all parameters
   if((config=fopen(fileName,"r"))==NULL)
     {
-      printf("WARNING: Cannot open the ENSDF file %s\n",fileName);
+      //printf("WARNING: Cannot open the ENSDF file %s\n",fileName);
       return;
     }
   while(!(feof(config)))//go until the end of file is reached

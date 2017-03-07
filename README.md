@@ -6,7 +6,7 @@ Maintainer: Jonathan Williams
 
 An offline viewer of ENSDF data.
 
-The program parses the plaintext ENSDF data files into a binary database, which can then be queried for information on various nuclei (levels, cascades, gamma-rays). 
+The program parses plaintext ENSDF data files (available at: https://www-nds.iaea.org/ensdf_base_files/) into a binary database, which can then be queried for information on various nuclei (levels, cascades, gamma-rays).
 
 ## Features
 
@@ -24,3 +24,8 @@ Use `make` to compile.  To run the program from anywhere, move the resulting `le
 The environment variable `ENSDF` pointing to a directory containing unzipped ENSDF data files must be defined in order for the program to run.  Running the program without this variable defined will display an error message.
 
 Tested using gcc and GNU make on Ubuntu 14.04 and Arch Linux (as of March 2017).  The code is self-contained and should work on more or less any Linux distro.
+
+### Command Line History
+
+This can be obtained using the `rlwrap` utility.  Install `rlwrap` (on Ubuntu: `sudo apt-get install rlwrap`) and then run the program using `rlwrap levelup`.
+

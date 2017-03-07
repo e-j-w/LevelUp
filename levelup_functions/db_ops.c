@@ -164,7 +164,7 @@ void rebuildDatabase(gdata *gd, FILE *db)
 	
 	initialize_database(gd);
 	
-	for(i=1;i<200;i++)
+	for(i=1;i<350;i++)
 		{
 			strcpy(fileName,"");
 			strcat(fileName,getenv("ENSDF"));
