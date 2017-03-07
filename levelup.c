@@ -94,68 +94,83 @@ int main(int argc, char *argv[])
   			{
   				strcpy(cmd2,cmd);
   				tok=strtok (cmd2," ");
-					tok = strtok (NULL, " ");//read the 2nd entry in the command
-					int nucl=nameToNuclIndex(tok,gd);
-					if ((tok != NULL) && (nucl>=0))
-						{
-  						showCascadeData(nucl,gd);
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nucleus specified.\n");
+					else
+						{	
+							int nucl=nameToNuclIndex(tok,gd);
+							if(nucl<0)
+								printf("Unknown nucleus: %s\n",tok);
+							else
+  							showCascadeData(nucl,gd);
   					}
-  				else
-  					printf("Unknown nucleus: %s\n",tok);
   			}
   		else if(strTokCmp(cmd,"lev",0)==0)
   			{
   				strcpy(cmd2,cmd);
   				tok=strtok (cmd2," ");
-					tok = strtok (NULL, " ");//read the 2nd entry in the command
-					int nucl=nameToNuclIndex(tok,gd);
-					if ((tok != NULL) && (nucl>=0))
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nucleus specified.\n");
+					else
 						{
-  						showLevelData(nucl,gd);
+							int nucl=nameToNuclIndex(tok,gd);
+							if(nucl<0)
+								printf("Unknown nucleus: %s\n",tok);
+							else
+  							showLevelData(nucl,gd);
   					}
-  				else
-  					printf("Unknown nucleus: %s\n",tok);
   			}
   		else if((strTokCmp(cmd,"overlap",0)==0)||(strTokCmp(cmd,"ol",0)==0))
   			{
-  				int findOL=1;
-  				strcpy(cmd2,cmd);
-  				tok=strtok (cmd2," ");
-					tok = strtok (NULL, " ");//read the 2nd entry in the command
-					int nucl1=nameToNuclIndex(tok,gd);
-					if ((tok == NULL) || (nucl1<0))
+					if((strcmp(cmd,"overlap")!=0)||(strcmp(cmd,"ol")!=0))
 						{
-							printf("Unknown nucleus: %s\n",tok);
-							findOL=0;
-						}
-					if (findOL)
-						{
-							tok = strtok (NULL, " ");//read the 3rd entry in the command
-							int nucl2=nameToNuclIndex(tok,gd);
-							if ((tok == NULL) || (nucl2<0))
+							int findOL=1;
+							strcpy(cmd2,cmd);
+							tok=strtok (cmd2," ");
+							if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+								printf("No nuclei specified.\n");
+							else
 								{
-									printf("Unknown nucleus: %s\n",tok);
-									findOL=0;
-								}
-							if (findOL)
-								{
-									findOverlappingLevels(nucl1,nucl2,gd);
+									int nucl1=nameToNuclIndex(tok,gd);
+									if(nucl1<0)
+										{
+											printf("Unknown nucleus: %s\n",tok);
+											findOL=0;
+										}
+									else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+										{
+											printf("Two nuclei must be specified.\n");
+										}
+									else
+										{
+											int nucl2=nameToNuclIndex(tok,gd);
+											if(nucl2<0)
+												{
+													printf("Unknown nucleus: %s\n",tok);
+													findOL=0;
+												}
+											if (findOL)
+												{
+													findOverlappingLevels(nucl1,nucl2,gd);
+												}
+										}
 								}
 						}
-					
-  			}
+				}
   		else if(strTokCmp(cmd,"nz",0)==0)
   			{
   				strcpy(cmd2,cmd);
   				tok=strtok (cmd2," ");
-					tok = strtok (NULL, " ");//read the 2nd entry in the command
-					int nucl=nameToNuclIndex(tok,gd);
-					if ((tok != NULL) && (nucl>=0))
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nucleus specified.\n");
+					else
 						{
-  						showNZ(nucl,gd);
+							int nucl=nameToNuclIndex(tok,gd);
+							if(nucl<0)
+								printf("Unknown nucleus: %s\n",tok);
+							else
+  							showNZ(nucl,gd);
   					}
-  				else
-  					printf("Unknown nucleus: %s\n",tok);
   			}
   		else if((strcmp(cmd,"listnuc")==0)||(strcmp(cmd,"ln")==0))
   			{

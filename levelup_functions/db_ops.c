@@ -83,7 +83,7 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 					{
 						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
 							{
-								printf("Overlap at energies: %15.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+								printf("Overlap at energies: %12.1f keV (%s), %7.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
 								overlapFound++;
 							}
 					}
@@ -96,7 +96,7 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
 							if(!(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0)))
 								{
-									printf("Nearby peaks at energies: %10.1f keV (%s), %10.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+									printf("Nearby peaks at energies: %7.1f keV (%s), %7.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
 									nearbyFound++;
 								}
 					}
