@@ -269,9 +269,16 @@ int main(int argc, char *argv[])
 										for(j=0;j<S32K;j++)
 											sp->sumHist[j]+=sp->hist[i][j];
 									
-									printf("Enter the energy contraction [keV / channel]: ");
-									fgets(cmd,256,stdin);
-									cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+									if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+										{
+											printf("Enter the energy contraction [keV / channel]: ");
+											fgets(cmd,256,stdin);
+											cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+										}
+									else
+										{
+											strcpy(cmd,tok);//3rd entry can be used as energy contraction
+										}
 									if(atof(cmd)<=0)
 										{
 											printf("Invalid energy contraction.  Returning...\n");

@@ -12,7 +12,7 @@ typedef struct
 {
 	double filterValue[S32K];
 	int numPeaksFound;
-  int centroid[MAXPEAKSTOFIND];
+  double centroid[MAXPEAKSTOFIND];
   double intensity[MAXPEAKSTOFIND];
 }peak_fit_par; //fit parameters
 

@@ -38,12 +38,12 @@ int readMCA(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
   
 }
 
-/*//function reads an .spe file into a double array and returns the array
-void readSPE(FILE * inp, const char * filename, const int numSpec, double outHist[NSPECT][S32K])
+//function reads an .spe file into a double array and returns the array
+int readSPE(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
 {
 	int i;
   char header[36];
-  float inpHist[S32K];
+  float inpHist[4096];
   memset(outHist,0,sizeof(*outHist));
 
 	if(fread(header,36,1,inp)!=1)
@@ -60,14 +60,14 @@ void readSPE(FILE * inp, const char * filename, const int numSpec, double outHis
     }
   
   //convert input data to double
-  for(i=0;i<S32K;i++)
+  for(i=0;i<4096;i++)
   	outHist[0][i]=(double)inpHist[i];
+  for(i=4096;i<S32K;i++)
+  	outHist[0][i]=0.;
+  	
+  return 1;
   
-  //copy data to each spectrum
-  for(i=1;i<numSpec;i++)
-  	memcpy(outHist[i],outHist[0],S32K*sizeof(double));
-  
-}*/
+}
 
 //reads a file containing spectrum data into an array
 //returns the number of spectra read (0 if reading fails)
@@ -86,12 +86,12 @@ int readDataFile(const char * filename, double outHist[NSPECT][S32K])
 			const char *dot = strrchr(filename, '.');//get the file extension
 			if(strcmp(dot + 1,"mca")==0)
 				numSpec=readMCA(inp, filename, outHist);
-			/*else if(strcmp(dot + 1,"spe")==0)
-				readSPE(inp, filename, numSpec, outHist);*/
+			else if(strcmp(dot + 1,"spe")==0)
+				numSpec=readSPE(inp, filename, outHist);
 			else
 				{
 					printf("Improper type of input file: %s\n",filename);
-				  printf("Integer array (.mca) files are supported.\n");
+				  printf("Integer array (.mca) or radware (.spe) files are supported.\n");
 				  //exit(-1);
 				}
 			fclose(inp);

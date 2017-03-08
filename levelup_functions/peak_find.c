@@ -1,7 +1,15 @@
 #include "peak_find.h"
 
+double getZero(int maxX, int minX, double maxY, double minY)
+{
+	double slope=(minY-maxY)/((double)(minX-maxX));
+	double zeroPos=((-1.*maxY)/slope) + maxX;
+	return zeroPos;
+}
+
 //function to find a peak, given an approximate value for its centroid
-//uses a trapezoidal filter, large spikes in the filter correspond to peaks
+//takes the derivative, large spikes in the filter correspond to peaks
+//the derivative is used to smooth out noise, and make the peak position correspond to a zero crossing in the filter output
 //contraction - energy contraction (keV/ch)
 //threshold - threshold (in sigma) for detection of a peak
 //maxPeaks - maximum number of peaks to find (will be ordered by intensity)
@@ -12,7 +20,7 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 
 	//trapezoidal filter parameters
 	int windowSize=1; //increase to soften the effect of noise and peaks
-	int windowSpacing=1; //spacing between windows in the filter
+	int windowSpacing=1; //spacing between windows in the filter (mininum 1)
 
 	double win1val,win2val;//holds values for trapezoidal filter window(s)
 	double maxval,minval;//holds maximum and minimum values from the filter
@@ -62,6 +70,7 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	if(maxch!=0)
 		stdev=stdev/maxch;
 	stdev=sqrt(stdev);
+	
 			
 	//set thresholds for peak detection
 	maxThreshold=threshold*stdev;
@@ -72,29 +81,37 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	//sweep through the filter output and find peaks
 	int risingFlag=0;
 	int fallingFlag=0;
+	int maxX,minX;
+	double maxY,minY;
 	par.numPeaksFound=0;
 	for(i=startCh;i<maxch;i++)
 		{
 			if(par.filterValue[i]>maxThreshold)
 				risingFlag=1;
+				maxX=i;
+				maxY=par.filterValue[i];
 			if((risingFlag==1)&&(par.filterValue[i]<=0.))
 				if(par.numPeaksFound<MAXPEAKSTOFIND)
 					{
-						par.centroid[par.numPeaksFound]=i;
+						//par.centroid[par.numPeaksFound]=i;
 						risingFlag=0;//reset the flag
 						fallingFlag=1;
 					}
 			if((fallingFlag==1)&&(par.filterValue[i]<minThreshold))
 				{
 					fallingFlag=0;//reset the flag
-					par.intensity[par.numPeaksFound]=data[par.centroid[par.numPeaksFound]];//get intensity of peak
+					minX=i;
+					minY=par.filterValue[i];
+					par.centroid[par.numPeaksFound]=getZero(maxX,minX,maxY,minY);
+					par.intensity[par.numPeaksFound]=data[(int)rint(par.centroid[par.numPeaksFound])];
+					//par.intensity[par.numPeaksFound]=data[(int)par.centroid[par.numPeaksFound]];//get intensity of peak
 					par.numPeaksFound++;//register that a peak was found
 				}
 		}
 	
 	//sort peaks by intensity in descending order
 	double a;
-	int ai;
+	double ai;
 	for(i=0;i<par.numPeaksFound;i++)
 		for(j=i+1;j<par.numPeaksFound;j++)
 			if(par.intensity[i]<par.intensity[j])
@@ -112,7 +129,8 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	//	printf("Intesity[%i]: %f\n",i,par.intensity[i]);
 	
 	//only retain the number of peaks requested
-	par.numPeaksFound=maxPeaks;
+	if(par.numPeaksFound>maxPeaks)
+		par.numPeaksFound=maxPeaks;
 	
 	//contract peak positions to the proper energy 
 	for(i=0;i<par.numPeaksFound;i++)
@@ -127,9 +145,9 @@ void reportPeakPositions(peak_fit_par * par)
 	for(i=0;i<par->numPeaksFound;i++)
 		{
 			if(i==0)
-				printf("Peak(s) found at energy: %i", par->centroid[i]);
+				printf("Peak(s) found at energy: %5.1f", par->centroid[i]);
 			else
-				printf(", %i", par->centroid[i]);
+				printf(", %5.1f", par->centroid[i]);
 		}
 	if(par->numPeaksFound>0)
 		printf(" keV.\n");

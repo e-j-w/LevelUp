@@ -73,6 +73,7 @@ void findCascadeFromFit(peak_fit_par * par, int numToMatch, gdata *gd)
 {
 
 	int i,j,k,l,numMatching,numMatched;
+	int matchInd[MAXPEAKSTOFIND];
 	
 	numMatched=0;
 	for(i=0;i<gd->numNucl;i++)
@@ -82,18 +83,25 @@ void findCascadeFromFit(peak_fit_par * par, int numToMatch, gdata *gd)
 				for(l=0;l<par->numPeaksFound;l++)
 					for(k=0;k<gd->nuclData[i].cascades[j].numLevels;k++)
 						{
-							if(fudgeNumbers(gd->nuclData[i].cascades[j].gammaEnergies[k],(double)par->centroid[l],2.0))
+							if(fudgeNumbers(gd->nuclData[i].cascades[j].gammaEnergies[k],par->centroid[l],2.0))
 								{
 									//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
-									//	printf("Energy %f matches cascade energy of %f\n",(double)par->centroid[l],gd->nuclData[i].cascades[j].gammaEnergies[k]);
+									//	printf("Energy %f matches cascade energy of %f\n",par->centroid[l],gd->nuclData[i].cascades[j].gammaEnergies[k]);
+									matchInd[numMatching]=l;
 									numMatching++;
 									break;//don't have the same gamma match multiple gammas in a single cascade
 								}
 						}
-				if(numMatching>=numToMatch)
+				if(numMatching==numToMatch)
 					{
 						numMatched++;
-						printf("Gamma energies match nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
+						printf("Gamma energies match nucleus %s (N = %i, Z = %i): ",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
+						for(l=0;l<numMatching;l++)
+							if(l==0)
+								printf("%5.1f",par->centroid[matchInd[l]]);
+							else
+								printf(", %5.1f",par->centroid[matchInd[l]]);
+						printf(" keV.\n");
 						//printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
 						break; //don't print out the same nucleus more than once
 					}
