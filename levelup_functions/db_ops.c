@@ -58,15 +58,41 @@ void findCascade(gamma_cascade * c, int numToMatch, gdata *gd)
 				if(numMatching>=numToMatch)
 					{
 						numMatched++;
-						printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
+						printf("Gamma energies match nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
 						//printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
 						break; //don't print out the same nucleus more than once
 					}
 			}
 	
 	if(numMatched==0)
-		printf("Cascade didn't match any nuclei in database.\n");
+		printf("Gamma energies didn't match any nuclei in database.\n");
 }
+
+void findCascadeInSpec(peak_fit_par * par, gdata *gd)
+{
+	int i;
+	int maxCascSize=par->numPeaksFound;
+	if(maxCascSize>5)
+		maxCascSize=5;
+		
+	gamma_cascade *c=(gamma_cascade*)malloc(sizeof(gamma_cascade));
+	c->numLevels=par->numPeaksFound;
+	for(i=0;i<par->numPeaksFound;i++)
+		{
+			c->gammaEnergies[i]=par->centroid[i];
+		}
+	for(i=maxCascSize;i>=3;i--)
+		{
+			if(i==par->numPeaksFound)
+				printf("Beginning search (cascades must match %i gamma energies)...\n",i);
+			else
+				printf("Broadening search (cascades must match %i gamma energies)...\n",i);
+			findCascade(c,i,gd);
+		}
+	printf("Search ended.\n");
+	free(c);
+}
+
 
 
 void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)

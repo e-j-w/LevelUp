@@ -1,8 +1,12 @@
 //definitions
 #include "levelup.h"
 //functions and logic
+#include "read_data.c"
+#include "peak_find.c"
 #include "parse_ENSDF.c"
 #include "db_ops.c"
+
+
 
 int main(int argc, char *argv[])
 {
@@ -75,6 +79,9 @@ int main(int argc, char *argv[])
   				printf("Command list:\n");
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
   				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
+  				printf("  id SP - finds nuclei with cascades which match peaks in the\n");
+  				printf("          specified spectrum (SP is the spectrum filename, eg.\n");
+  				printf("          'spectrum.mca')\n");
   				printf("  lev NUCL - prints level data for the specified nucleus\n");
   				printf("  ol NUCL1 NUCL2 - finds overlapping gamma rays in the two\n"); 
   				printf("                   specified nuclei\n");
@@ -83,7 +90,7 @@ int main(int argc, char *argv[])
   				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n");
   				printf("  rebuild - rebuild the ENSDF database from ENSDF files on disk\n");
   				printf("  help - list commands\n");
-  				printf("  exit, quit - exit the program\n");
+  				printf("  exit, quit, ^C - exit the program\n");
   			}
   		else if((strcmp(cmd,"exit")==0)||(strcmp(cmd,"quit")==0))
   			{
@@ -241,6 +248,47 @@ int main(int argc, char *argv[])
 								}
 						}
 					fclose(db);
+  			}
+  		else if(strTokCmp(cmd,"id",0)==0)
+  			{
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No filename specified.\n");
+					else
+						{
+							printf("Identifying species in spectrum data file: %s.\n",tok);
+							inp_sp *sp=(inp_sp*)malloc(sizeof(inp_sp));
+							sp->numSpectra=readDataFile(tok, sp->hist);
+							if(sp->numSpectra>0)
+								{
+									//sum mca data
+									for(i=0;i<S32K;i++)
+										sp->sumHist[i]=0.;
+									for(i=0;i<sp->numSpectra;i++)
+										for(j=0;j<S32K;j++)
+											sp->sumHist[j]+=sp->hist[i][j];
+									
+									printf("Enter the energy contraction [keV / channel]: ");
+									fgets(cmd,256,stdin);
+									cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+									if(atof(cmd)<=0)
+										{
+											printf("Invalid energy contraction.  Returning...\n");
+										}
+									else
+										{
+											//find peak positions
+											peak_fit_par pfpar = findPeak(sp->sumHist,atof(cmd));
+											reportPeakPositions(&pfpar);
+											//find matching cascades
+											findCascadeInSpec(&pfpar,gd);
+										}
+								}
+							free(sp);
+  					}
+  			
+  				
   			}
   		else if(strcmp(cmd,"")==0)
   			{

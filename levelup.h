@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//spectrum data file specs
+#define S32K 32768
+#define NSPECT 100
+
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory
 #define MAXCASCDELENGTH 10
@@ -46,6 +50,14 @@ typedef struct
 	int numNucl; //number of nuclei for which data is stored
 	nucl nuclData[MAXNUMNUCL];
 }gdata; //complete set of gamma data for all nuclei
+
+
+typedef struct
+{
+	int numSpectra; //number of spectra
+	double hist[NSPECT][S32K]; //spectrum histogram data
+	double sumHist[S32K];
+}inp_sp;
 
 #endif
 
