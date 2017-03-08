@@ -68,6 +68,41 @@ void findCascade(gamma_cascade * c, int numToMatch, gdata *gd)
 		printf("Gamma energies didn't match any nuclei in database.\n");
 }
 
+//function to find cascade(s) which match the input peak parameters
+void findCascadeFromFit(peak_fit_par * par, int numToMatch, gdata *gd)
+{
+
+	int i,j,k,l,numMatching,numMatched;
+	
+	numMatched=0;
+	for(i=0;i<gd->numNucl;i++)
+		for(j=0;j<gd->nuclData[i].numCascades;j++)
+			{
+				numMatching=0;
+				for(l=0;l<par->numPeaksFound;l++)
+					for(k=0;k<gd->nuclData[i].cascades[j].numLevels;k++)
+						{
+							if(fudgeNumbers(gd->nuclData[i].cascades[j].gammaEnergies[k],(double)par->centroid[l],2.0))
+								{
+									//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+									//	printf("Energy %f matches cascade energy of %f\n",(double)par->centroid[l],gd->nuclData[i].cascades[j].gammaEnergies[k]);
+									numMatching++;
+									break;//don't have the same gamma match multiple gammas in a single cascade
+								}
+						}
+				if(numMatching>=numToMatch)
+					{
+						numMatched++;
+						printf("Gamma energies match nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
+						//printf("Cascade matches nucleus: %s (N = %i, Z = %i)\n",gd->nuclData[i].nuclName,gd->nuclData[i].N,gd->nuclData[i].Z);
+						break; //don't print out the same nucleus more than once
+					}
+			}
+	
+	if(numMatched==0)
+		printf("Gamma energies didn't match any nuclei in database.\n");
+}
+
 void findCascadeInSpec(peak_fit_par * par, gdata *gd)
 {
 	int i;
@@ -75,22 +110,15 @@ void findCascadeInSpec(peak_fit_par * par, gdata *gd)
 	if(maxCascSize>5)
 		maxCascSize=5;
 		
-	gamma_cascade *c=(gamma_cascade*)malloc(sizeof(gamma_cascade));
-	c->numLevels=par->numPeaksFound;
-	for(i=0;i<par->numPeaksFound;i++)
-		{
-			c->gammaEnergies[i]=par->centroid[i];
-		}
 	for(i=maxCascSize;i>=3;i--)
 		{
-			if(i==par->numPeaksFound)
+			if(i==maxCascSize)
 				printf("Beginning search (cascades must match %i gamma energies)...\n",i);
 			else
 				printf("Broadening search (cascades must match %i gamma energies)...\n",i);
-			findCascade(c,i,gd);
+			findCascadeFromFit(par,i,gd);
 		}
 	printf("Search ended.\n");
-	free(c);
 }
 
 

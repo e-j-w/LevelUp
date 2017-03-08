@@ -12,7 +12,7 @@
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory
-#define MAXCASCDELENGTH 10
+#define MAXCASCDELENGTH 20
 #define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXLEVELSPERNUCL 50

@@ -2,14 +2,17 @@
 
 //function to find a peak, given an approximate value for its centroid
 //uses a trapezoidal filter, large spikes in the filter correspond to peaks
-peak_fit_par findPeak(const double * data, double contraction)
+//contraction - energy contraction (keV/ch)
+//threshold - threshold (in sigma) for detection of a peak
+//maxPeaks - maximum number of peaks to find (will be ordered by intensity)
+peak_fit_par findPeak(const double * data, double contraction, double threshold, int maxPeaks)
 { 
 
 	peak_fit_par par;
 
 	//trapezoidal filter parameters
-	int windowSize=5; //increase to soften the effect of noise and peaks
-	int windowSpacing=2; //spacing between windows in the filter
+	int windowSize=1; //increase to soften the effect of noise and peaks
+	int windowSpacing=1; //spacing between windows in the filter
 
 	double win1val,win2val;//holds values for trapezoidal filter window(s)
 	double maxval,minval;//holds maximum and minimum values from the filter
@@ -47,10 +50,24 @@ peak_fit_par findPeak(const double * data, double contraction)
 			{
 				par.filterValue[i]=0.;
 			}
+	
+	double avg=0.;
+	double stdev=0.;
+	for(i=startCh;i<maxch;i++)
+		avg+=par.filterValue[i];
+	if(maxch!=0)
+		avg=avg/maxch;
+	for(i=startCh;i<maxch;i++)
+		stdev+=(par.filterValue[i]-avg)*(par.filterValue[i]-avg);
+	if(maxch!=0)
+		stdev=stdev/maxch;
+	stdev=sqrt(stdev);
 			
 	//set thresholds for peak detection
-	maxThreshold=maxval*0.25;
-	minThreshold=minval*0.25;
+	maxThreshold=threshold*stdev;
+	minThreshold=-1*threshold*stdev;
+	
+	printf("Filter output mean: %10.3f, stdev: %10.3f, min: %10.3f, max: %10.3f\n",avg,stdev,minval,maxval);
 	
 	//sweep through the filter output and find peaks
 	int risingFlag=0;
@@ -70,14 +87,36 @@ peak_fit_par findPeak(const double * data, double contraction)
 			if((fallingFlag==1)&&(par.filterValue[i]<minThreshold))
 				{
 					fallingFlag=0;//reset the flag
+					par.intensity[par.numPeaksFound]=data[par.centroid[par.numPeaksFound]];//get intensity of peak
 					par.numPeaksFound++;//register that a peak was found
 				}
 		}
 	
+	//sort peaks by intensity in descending order
+	double a;
+	int ai;
+	for(i=0;i<par.numPeaksFound;i++)
+		for(j=i+1;j<par.numPeaksFound;j++)
+			if(par.intensity[i]<par.intensity[j])
+				{
+					//swap values
+					a=par.intensity[i];
+					par.intensity[i]=par.intensity[j];
+					par.intensity[j]=a;
+					ai=par.centroid[i];
+					par.centroid[i]=par.centroid[j];
+					par.centroid[j]=ai;
+				}
+	
+	//for(i=0;i<par.numPeaksFound;i++)
+	//	printf("Intesity[%i]: %f\n",i,par.intensity[i]);
+	
+	//only retain the number of peaks requested
+	par.numPeaksFound=maxPeaks;
+	
 	//contract peak positions to the proper energy 
 	for(i=0;i<par.numPeaksFound;i++)
 		par.centroid[i]=par.centroid[i]*contraction;
-	
 	
 	return par;
 }
@@ -92,5 +131,8 @@ void reportPeakPositions(peak_fit_par * par)
 			else
 				printf(", %i", par->centroid[i]);
 		}
-	printf(" keV.\n");
+	if(par->numPeaksFound>0)
+		printf(" keV.\n");
+	else
+		printf("No peaks found.\n");
 }
