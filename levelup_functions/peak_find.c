@@ -105,7 +105,7 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	maxThreshold=-1*threshold*stdev;
 	
 	printf("Filter output mean: %10.3f, stdev: %10.3f, min: %10.3f, max: %10.3f\n",avg,stdev,minval,maxval);
-	printf("Threshold 1: %10.3f, Threshold 2: %10.3f\n",maxThreshold,minThreshold);
+	//printf("Threshold 1: %10.3f, Threshold 2: %10.3f\n",maxThreshold,minThreshold);
 		
 	//sweep through the filter output and find peaks
 	int fallingFlag=0;

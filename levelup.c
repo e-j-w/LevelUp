@@ -20,11 +20,10 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
   
-  FILE *db;
-  //allocate structures
-  gdata *gd=(gdata*)malloc(sizeof(gdata));
-  initialize_database(gd);
-	printf("Data structures allocated.\n");
+	FILE *db;
+	//allocate structures
+	gdata *gd=(gdata*)malloc(sizeof(gdata));
+	initialize_database(gd);
 	
 	
 	//process the ENSDF database file
