@@ -69,7 +69,7 @@ void findCascade(gamma_cascade * c, int numToMatch, gdata *gd)
 }
 
 //function to find cascade(s) which match the input peak parameters
-void findCascadeFromFit(peak_fit_par * par, casc_match_par * cpar, gdata *gd)
+void findCascadesFromFit(peak_fit_par * par, casc_match_par * cpar, gdata *gd)
 {
 	int i,j,k,l;
 	
@@ -99,7 +99,7 @@ void findCascadeInSpec(peak_fit_par * par, gdata *gd)
 	int maxCascSize=par->numPeaksFound;
 	
 	casc_match_par *cpar=(casc_match_par*)malloc(sizeof(casc_match_par));
-	findCascadeFromFit(par,cpar,gd);
+	findCascadesFromFit(par,cpar,gd);
 	
 	printf("NUCLEI INDENTIFIED FROM CASCADES:\n");
 	
@@ -111,24 +111,81 @@ void findCascadeInSpec(peak_fit_par * par, gdata *gd)
 					if(i>maxNumMatching)
 						maxNumMatching=i;
 	
-	for(i=maxNumMatching;i>=(maxNumMatching-1);i--)
-		for(j=0;j<gd->numNucl;j++)
-			if(cascFoundForNucl[j]==0)
-				for(k=0;k<gd->nuclData[j].numCascades;k++)
+	if(maxNumMatching>1)
+		{
+			for(i=maxNumMatching;i>=(maxNumMatching-1);i--)
+				for(j=0;j<gd->numNucl;j++)
 					if(cascFoundForNucl[j]==0)
-						if(cpar->numMatchingGammas[j][k]==i)
-							{
-								printf("%s:",gd->nuclData[j].nuclName);
-								for(l=0;l<i;l++)
-									if(l==0)
-										printf(" %5.1f",cpar->matchCentroid[j][k][l]);
-									else
-										printf(", %5.1f",cpar->matchCentroid[j][k][l]);
-								printf(" keV (matched %i gamma rays)\n",i);
-								cascFoundForNucl[j]=1;
-							}
-	printf("Search ended.\n");
+						for(k=0;k<gd->nuclData[j].numCascades;k++)
+							if(cascFoundForNucl[j]==0)
+								if(cpar->numMatchingGammas[j][k]==i)
+									{
+										printf("%s:",gd->nuclData[j].nuclName);
+										for(l=0;l<i;l++)
+											if(l==0)
+												printf(" %5.1f",cpar->matchCentroid[j][k][l]);
+											else
+												printf(", %5.1f",cpar->matchCentroid[j][k][l]);
+										printf(" keV (matched %i gamma rays)\n",i);
+										cascFoundForNucl[j]=1;
+									}
+		}
+	else
+		{
+			printf("No matching nuclei found.\n");
+		}
 	free(cascFoundForNucl);
+	free(cpar);
+}
+
+void findCascadeFromGammaEInSpec(peak_fit_par * par, gdata *gd, double ge)
+{
+	int i,j,k,l,m;
+	//int *cascFoundForNucl=(int*)calloc(MAXNUMNUCL,sizeof(int));//initialize to 0 using calloc
+	int maxCascSize=par->numPeaksFound;
+	
+	casc_match_par *cpar=(casc_match_par*)malloc(sizeof(casc_match_par));
+	findCascadesFromFit(par,cpar,gd);
+	
+	printf("CASCADE CANDIDATES IN SPECTRUM MATCHING GAMMA ENERGY: %5.1f keV\n",ge);
+	
+	int maxNumMatching=0;
+	for(i=maxCascSize;i>=3;i--)
+		for(j=0;j<gd->numNucl;j++)
+			for(k=0;k<gd->nuclData[j].numCascades;k++)
+				if(cpar->numMatchingGammas[j][k]==i)
+					if(i>maxNumMatching)
+						maxNumMatching=i;
+	
+	int matched=0;
+	if(maxNumMatching>1)
+		{
+			for(i=maxNumMatching;i>=(maxNumMatching-1);i--)
+				for(j=0;j<gd->numNucl;j++)
+					//if(cascFoundForNucl[j]==0)
+						for(k=0;k<gd->nuclData[j].numCascades;k++)
+							//if(cascFoundForNucl[j]==0)
+								if(cpar->numMatchingGammas[j][k]==i)
+									for(l=0;l<i;l++)
+										if(fudgeNumbers(ge,cpar->matchCentroid[j][k][l],2.0))
+											{
+												printf("%s:",gd->nuclData[j].nuclName);
+												for(m=0;m<i;m++)
+													if(m==0)
+														printf(" %5.1f",cpar->matchCentroid[j][k][m]);
+													else
+														printf(", %5.1f",cpar->matchCentroid[j][k][m]);
+												printf(" keV (matched %i gamma rays)\n",i);
+												matched=1;
+												//cascFoundForNucl[j]=1;
+												break;
+											}
+		}
+	if(matched==0)
+		{
+			printf("No matching cascades found.\n");
+		}
+	//free(cascFoundForNucl);
 	free(cpar);
 }
 

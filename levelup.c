@@ -75,21 +75,24 @@ int main(int argc, char *argv[])
   		cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
   		if(strcmp(cmd,"help")==0)
   			{
-  				printf("Command list:\n");
+  				printf("\nCommand list:\n\n");
   				printf("  casc NUCL - prints cascade data for the specified nucleus\n");
-  				printf("              (NUCL is the nucleus name, eg. '68SE')\n");
+  				printf("              (NUCL is the nucleus name, eg. '68SE')\n\n");
   				printf("  id SP - finds nuclei with cascades which match peaks in the\n");
   				printf("          specified spectrum (SP is the spectrum filename, eg.\n");
-  				printf("          'spectrum.mca')\n");
-  				printf("  lev NUCL - prints level data for the specified nucleus\n");
+  				printf("          'spectrum.mca')\n\n");
+  				printf("  qsp SP - finds nuclei corresponding to a specific gamma ray energy\n");
+  				printf("           in the specified spectrum, by finding cascades in the\n");
+  				printf("           spectrum which contain a gamma ray at or near that energy\n\n");
+  				printf("  lev NUCL - prints level data for the specified nucleus\n\n");
   				printf("  ol NUCL1 NUCL2 - finds overlapping gamma rays in the two\n"); 
-  				printf("                   specified nuclei\n");
-  				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n");
-  				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n");
-  				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n");
-  				printf("  rebuild - rebuild the ENSDF database from ENSDF files on disk\n");
-  				printf("  help - list commands\n");
-  				printf("  exit, quit, ^C - exit the program\n");
+  				printf("                   specified nuclei\n\n");
+  				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n\n");
+  				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n\n");
+  				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n\n");
+  				printf("  rebuild - rebuild the ENSDF database from ENSDF files on disk\n\n");
+  				printf("  help - list commands\n\n");
+  				printf("  exit, quit, ^C - exit the program\n\n");
   			}
   		else if((strcmp(cmd,"exit")==0)||(strcmp(cmd,"quit")==0))
   			{
@@ -278,17 +281,85 @@ int main(int argc, char *argv[])
 										{
 											strcpy(cmd,tok);//3rd entry can be used as energy contraction
 										}
-									if(atof(cmd)<=0)
+									double cntr=atof(cmd);
+									if(cntr<=0)
 										{
 											printf("Invalid energy contraction.  Returning...\n");
 										}
 									else
 										{
 											//find peak positions
-											peak_fit_par pfpar = findPeak(sp->sumHist,atof(cmd),5.,20);
+											peak_fit_par pfpar = findPeak(sp->sumHist,cntr,5.,20);
 											reportPeakPositions(&pfpar);
 											//find matching cascades
 											findCascadeInSpec(&pfpar,gd);
+										}
+								}
+							free(sp);
+  					}
+  			}
+  		else if(strTokCmp(cmd,"qsp",0)==0)
+  			{
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No filename specified.\n");
+					else
+						{
+							printf("Finding gamma rays in spectrum data file: %s.\n",tok);
+							inp_sp *sp=(inp_sp*)malloc(sizeof(inp_sp));
+							sp->numSpectra=readDataFile(tok, sp->hist);
+							if(sp->numSpectra>0)
+								{
+									//sum mca data
+									for(i=0;i<S32K;i++)
+										sp->sumHist[i]=0.;
+									for(i=0;i<sp->numSpectra;i++)
+										for(j=0;j<S32K;j++)
+											sp->sumHist[j]+=sp->hist[i][j];
+									
+									if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+										{
+											printf("Enter the energy contraction [keV / channel]: ");
+											fgets(cmd,256,stdin);
+											cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+										}
+									else
+										{
+											strcpy(cmd,tok);//3rd entry can be used as energy contraction
+										}
+									double cntr=atof(cmd);
+									if(cntr<=0)
+										{
+											printf("Invalid energy contraction.  Returning...\n");
+										}
+									else
+										{
+											
+											if((tok = strtok (NULL, " "))==NULL)//read the 4th entry in the command
+												{
+													printf("Enter the gamma ray energy to check [keV]: ");
+													fgets(cmd,256,stdin);
+													cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+												}
+											else
+												{
+													strcpy(cmd,tok);//3rd entry can be used as energy contraction
+												}
+											double ge=atof(cmd);
+											if(ge<=0)
+												{
+													printf("Invalid gamma ray energy.  Returning...\n");
+												}
+											else
+												{
+													//find peak positions (will use looser criteria here than in id)
+													peak_fit_par pfpar = findPeak(sp->sumHist,cntr,3.,50);
+													//reportPeakPositions(&pfpar);
+													//find matching cascades
+													findCascadeFromGammaEInSpec(&pfpar,gd,ge);
+												}
+											
 										}
 								}
 							free(sp);

@@ -104,7 +104,7 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	minThreshold=-1*(threshold+1)*stdev;
 	maxThreshold=-1*threshold*stdev;
 	
-	printf("Filter output mean: %10.3f, stdev: %10.3f, min: %10.3f, max: %10.3f\n",avg,stdev,minval,maxval);
+	//printf("Filter output mean: %10.3f, stdev: %10.3f, min: %10.3f, max: %10.3f\n",avg,stdev,minval,maxval);
 	//printf("Threshold 1: %10.3f, Threshold 2: %10.3f\n",maxThreshold,minThreshold);
 		
 	//sweep through the filter output and find peaks
@@ -189,5 +189,5 @@ void reportPeakPositions(peak_fit_par * par)
 				printf(", %5.1f", par->centroid[i]);
 		}
 	if(par->numPeaksFound>0)
-		printf(" keV.\n");
+		printf(" keV (sorted by intensity).\n");
 }
