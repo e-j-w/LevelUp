@@ -21,6 +21,7 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 	//trapezoidal filter parameters
 	int windowSize=1; //increase to soften the effect of noise and peaks
 	int windowSpacing=1; //spacing between windows in the filter (mininum 1)
+	int windowShift=(int)windowSize/2.;//number of channels to shift the windows by
 
 	double win1val,win2val;//holds values for trapezoidal filter window(s)
 	double maxval,minval;//holds maximum and minimum values from the filter
@@ -35,77 +36,107 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 
 	maxval=0;
 	minval=BIG_NUMBER;
-
+	
 	//construct the trapezoidal filter output
-	for(i=startCh;i<endCh;i++)
+	for(i=0;i<windowShift;i++)
+		par.filterValue[i]=0.;
+	for(i=windowShift;i<endCh;i++)
 		if((i+windowSize+windowSpacing)<S32K)//check that we won't go out of bounds
 			{
 				win1val=0;
 				win2val=0;
 				for(j=0;j<windowSize;j++)
 					{
-						win1val+=data[i+j];
-						win2val+=data[i+j+windowSpacing];
+						win1val+=data[i+j-windowShift];
+						win2val+=data[i+j+windowSpacing-windowShift];
 					}
 				par.filterValue[i]=win2val-win1val;// trapezoidal filter value
-				if(par.filterValue[i]>maxval)
-					maxval=par.filterValue[i];
-				if(par.filterValue[i]<minval)
-					minval=par.filterValue[i];
-				maxch=i;
 			}
 		else
 			{
 				par.filterValue[i]=0.;
 			}
 	
+	
+	//use smoother filter parameters for 2nd derivative 
+	windowSize=3; //increase to soften the effect of noise and peaks
+	windowSpacing=3; //spacing between windows in the filter (mininum 1)
+	windowShift=(int)windowSize/2.;//number of channels to shift the windows by
+	
+	//take 2nd derivative
+	for(i=0;i<windowShift;i++)
+		par.filter2Value[i]=0.;
+	for(i=windowShift;i<endCh;i++)
+		if((i+windowSize+windowSpacing)<S32K)//check that we won't go out of bounds
+			{
+				win1val=0;
+				win2val=0;
+				for(j=0;j<windowSize;j++)
+					{
+						win1val+=par.filterValue[i+j-windowShift];
+						win2val+=par.filterValue[i+j+windowSpacing-windowShift];
+					}
+				par.filter2Value[i]=win2val-win1val;// trapezoidal filter value
+				if(par.filter2Value[i]>maxval)
+					maxval=par.filter2Value[i];
+				if(par.filter2Value[i]<minval)
+					minval=par.filter2Value[i];
+				maxch=i;
+			}
+		else
+			{
+				par.filter2Value[i]=0.;
+			}
+	
 	double avg=0.;
 	double stdev=0.;
 	for(i=startCh;i<maxch;i++)
-		avg+=par.filterValue[i];
+		avg+=par.filter2Value[i];
 	if(maxch!=0)
 		avg=avg/maxch;
 	for(i=startCh;i<maxch;i++)
-		stdev+=(par.filterValue[i]-avg)*(par.filterValue[i]-avg);
+		stdev+=(par.filter2Value[i]-avg)*(par.filter2Value[i]-avg);
 	if(maxch!=0)
 		stdev=stdev/maxch;
 	stdev=sqrt(stdev);
-	
 			
 	//set thresholds for peak detection
-	maxThreshold=threshold*stdev;
-	minThreshold=-1*threshold*stdev;
+	minThreshold=-1*(threshold+1)*stdev;
+	maxThreshold=-1*threshold*stdev;
 	
 	printf("Filter output mean: %10.3f, stdev: %10.3f, min: %10.3f, max: %10.3f\n",avg,stdev,minval,maxval);
-	
+	printf("Threshold 1: %10.3f, Threshold 2: %10.3f\n",maxThreshold,minThreshold);
+		
 	//sweep through the filter output and find peaks
-	int risingFlag=0;
 	int fallingFlag=0;
-	int maxX,minX;
-	double maxY,minY;
+	int risingFlag=0;
+	int x1,x2;
 	par.numPeaksFound=0;
 	for(i=startCh;i<maxch;i++)
 		{
-			if(par.filterValue[i]>maxThreshold)
-				risingFlag=1;
-				maxX=i;
-				maxY=par.filterValue[i];
-			if((risingFlag==1)&&(par.filterValue[i]<=0.))
-				if(par.numPeaksFound<MAXPEAKSTOFIND)
-					{
-						//par.centroid[par.numPeaksFound]=i;
-						risingFlag=0;//reset the flag
-						fallingFlag=1;
-					}
-			if((fallingFlag==1)&&(par.filterValue[i]<minThreshold))
+			if(par.numPeaksFound<MAXPEAKSTOFIND)
 				{
-					fallingFlag=0;//reset the flag
-					minX=i;
-					minY=par.filterValue[i];
-					par.centroid[par.numPeaksFound]=getZero(maxX,minX,maxY,minY);
-					par.intensity[par.numPeaksFound]=data[(int)rint(par.centroid[par.numPeaksFound])];
-					//par.intensity[par.numPeaksFound]=data[(int)par.centroid[par.numPeaksFound]];//get intensity of peak
-					par.numPeaksFound++;//register that a peak was found
+					if(par.filter2Value[i]<maxThreshold)
+						if(i>0)
+							{
+								fallingFlag=1;
+								x1=i-1;
+							}
+					if((fallingFlag==1)&&(par.filter2Value[i]<minThreshold))
+						{
+							fallingFlag=0;
+							risingFlag=1;
+						}
+					if((risingFlag==1)&&(par.filter2Value[i]>maxThreshold))
+						{
+							risingFlag=0;
+							x2=i;
+							par.centroid[par.numPeaksFound]=(x1+x2)/2.;
+							//printf("centroid: %f\n",par.centroid[par.numPeaksFound]);
+							//getc(stdin);
+							par.intensity[par.numPeaksFound]=data[(int)par.centroid[par.numPeaksFound]];//get intensity of peak
+							par.numPeaksFound++;//register that a peak was found
+						}
 				}
 		}
 	
@@ -142,15 +173,21 @@ peak_fit_par findPeak(const double * data, double contraction, double threshold,
 void reportPeakPositions(peak_fit_par * par)
 {
 	int i;
+	
+	if(par->numPeaksFound>1)
+		printf("%i peaks found at energies:",par->numPeaksFound);
+	else if(par->numPeaksFound==1)
+		printf("Peak found at energy:");
+	else if(par->numPeaksFound==1)
+		printf("No peaks found.\n");
+		
 	for(i=0;i<par->numPeaksFound;i++)
 		{
 			if(i==0)
-				printf("Peak(s) found at energy: %5.1f", par->centroid[i]);
+				printf(" %5.1f", par->centroid[i]);
 			else
 				printf(", %5.1f", par->centroid[i]);
 		}
 	if(par->numPeaksFound>0)
 		printf(" keV.\n");
-	else
-		printf("No peaks found.\n");
 }

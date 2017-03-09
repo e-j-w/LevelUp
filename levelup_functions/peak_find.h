@@ -10,7 +10,7 @@
 
 typedef struct
 {
-	double filterValue[S32K];
+	double filterValue[S32K],filter2Value[S32K];
 	int numPeaksFound;
   double centroid[MAXPEAKSTOFIND];
   double intensity[MAXPEAKSTOFIND];

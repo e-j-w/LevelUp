@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 									else
 										{
 											//find peak positions
-											peak_fit_par pfpar = findPeak(sp->sumHist,atof(cmd),3.,20);
+											peak_fit_par pfpar = findPeak(sp->sumHist,atof(cmd),5.,20);
 											reportPeakPositions(&pfpar);
 											//find matching cascades
 											findCascadeInSpec(&pfpar,gd);
