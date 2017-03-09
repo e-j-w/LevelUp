@@ -87,6 +87,10 @@ int main(int argc, char *argv[])
   				printf("  lev NUCL - prints level data for the specified nucleus\n\n");
   				printf("  ol NUCL1 NUCL2 - finds overlapping gamma rays in the two\n"); 
   				printf("                   specified nuclei\n\n");
+  				printf("  olr NUCL1 NUCL2 - finds overlapping gamma rays in the in the\n");
+  				printf("                    nucleus NUCL1 and nuclei in the region of\n"); 
+  				printf("                    the nucleus NUCL2 (a search width will be\n"); 
+  				printf("                    requested)\n\n");
   				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n\n");
   				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n\n");
   				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n\n");
@@ -129,39 +133,84 @@ int main(int argc, char *argv[])
   							showLevelData(nucl,gd);
   					}
   			}
-  		else if((strTokCmp(cmd,"overlap",0)==0)||(strTokCmp(cmd,"ol",0)==0))
+  		else if(strTokCmp(cmd,"ol",0)==0)
   			{
-					if((strcmp(cmd,"overlap")!=0)||(strcmp(cmd,"ol")!=0))
+					int findOL=1;
+					strcpy(cmd2,cmd);
+					tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nuclei specified.\n");
+					else
 						{
-							int findOL=1;
-							strcpy(cmd2,cmd);
-							tok=strtok (cmd2," ");
-							if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
-								printf("No nuclei specified.\n");
+							int nucl1=nameToNuclIndex(tok,gd);
+							if(nucl1<0)
+								{
+									printf("Unknown nucleus: %s\n",tok);
+									findOL=0;
+								}
+							else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+								{
+									printf("Two nuclei must be specified.\n");
+								}
 							else
 								{
-									int nucl1=nameToNuclIndex(tok,gd);
-									if(nucl1<0)
+									int nucl2=nameToNuclIndex(tok,gd);
+									if(nucl2<0)
 										{
 											printf("Unknown nucleus: %s\n",tok);
 											findOL=0;
 										}
-									else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+									if (findOL)
 										{
-											printf("Two nuclei must be specified.\n");
+											findOverlappingLevels(nucl1,nucl2,gd);
+										}
+								}
+						}
+				}
+			else if(strTokCmp(cmd,"olr",0)==0)
+  			{
+					int findOL=1;
+					strcpy(cmd2,cmd);
+					tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nuclei specified.\n");
+					else
+						{
+							int nucl1=nameToNuclIndex(tok,gd);
+							if(nucl1<0)
+								{
+									printf("Unknown nucleus: %s\n",tok);
+									findOL=0;
+								}
+							else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+								{
+									printf("Two nuclei must be specified.\n");
+								}
+							else
+								{
+									int nucl2=nameToNuclIndex(tok,gd);
+									if(nucl2<0)
+										{
+											printf("Unknown nucleus: %s\n",tok);
+											findOL=0;
+										}
+									else if((tok = strtok (NULL, " "))==NULL)//read the 4th entry in the command
+										{
+											printf("Enter the width/height (in nucleon number) of the region in the nuclear chart to search: ");
+											fgets(cmd,256,stdin);
+											cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
 										}
 									else
 										{
-											int nucl2=nameToNuclIndex(tok,gd);
-											if(nucl2<0)
-												{
-													printf("Unknown nucleus: %s\n",tok);
-													findOL=0;
-												}
-											if (findOL)
-												{
-													findOverlappingLevels(nucl1,nucl2,gd);
-												}
+											strcpy(cmd,tok);
+										}
+									if (findOL)
+										{
+											int dim=atoi(cmd);
+											if(dim<=0)
+												printf("Invalid search width/height: %i\n",dim);
+											else
+												findOverlappingLevelsInRegion(nucl1,nucl2,dim,gd);
 										}
 								}
 						}

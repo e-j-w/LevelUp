@@ -14,7 +14,7 @@ Right now the program's capabilities are fairly limited, but more will be added 
 
 * Listing of levels and gamma rays corresponding to a given nucleus.
 * Listing of gamma-ray cascades corresponding to a given nucleus.
-* Checking for overlapping/nearby gamma-ray energies in two nuclei.
+* Checking for overlapping/nearby gamma-ray energies in two nuclei, or in one nucleus and nuclei in the region of another nucleus.
 * Lookup of gamma-ray cascades entered by the user, in order to determine the nucleus from which the cascade originates.
 * Determination of nuclei present in gamma ray spectra based on cascades present in the spectrum.
 

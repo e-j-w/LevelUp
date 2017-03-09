@@ -10,6 +10,17 @@ int nameToNuclIndex(const char * name, gdata *gd)
 	return -1;//negative value indicates failure
 }
 
+int NZToNuclIndex(int N, int Z, gdata *gd)
+{
+	int i;
+		for(i=0;i<gd->numNucl;i++)
+			if(gd->nuclData[i].N==N)
+				if(gd->nuclData[i].Z==Z)
+					return i;
+	
+	return -1;//negative value indicates failure
+}
+
 void showCascadeData(int nucl, gdata *gd)
 {
 	//dump cascade data
@@ -228,6 +239,23 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 	else
 		printf("\n%i overlapping and %i nearby gamma ray energies found in the nuclei %s and %s.\n",overlapFound,nearbyFound,gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].nuclName);
 
+}
+
+
+//finds levels of nucleus 1 which overlaps with levels of nuclei in the
+//region of nucleus 2 (N,Z +/- searchDim)
+void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, gdata *gd)
+{
+	int i,j,n2ind;
+	
+	for(i=gd->nuclData[nucl2].N-searchDim;i<=gd->nuclData[nucl2].N+searchDim;i++)
+		for(j=gd->nuclData[nucl2].Z-searchDim;j<=gd->nuclData[nucl2].Z+searchDim;j++)
+			{
+				n2ind=NZToNuclIndex(i,j,gd);
+				if(n2ind>=0)
+					if(nucl1!=n2ind)
+						findOverlappingLevels(nucl1,n2ind,gd);
+			}
 }
 
 
