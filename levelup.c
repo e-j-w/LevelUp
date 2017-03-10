@@ -84,7 +84,9 @@ int main(int argc, char *argv[])
   				printf("  qsp SP - finds nuclei corresponding to a specific gamma ray energy\n");
   				printf("           in the specified spectrum, by finding cascades in the\n");
   				printf("           spectrum which contain a gamma ray at or near that energy\n\n");
-  				printf("  lev NUCL - prints level data for the specified nucleus\n\n");
+  				printf("  lev NUCL - prints level data for the specified nucleus (can\n"); 
+  				printf("             optionally specify the number of levels to show as a\n");
+  				printf("             second parameter)\n\n");
   				printf("  ol NUCL1 NUCL2 - finds overlapping gamma rays in the two\n"); 
   				printf("                   specified nuclei\n\n");
   				printf("  olr NUCL1 NUCL2 - finds overlapping gamma rays in the in the\n");
@@ -129,8 +131,17 @@ int main(int argc, char *argv[])
 							int nucl=nameToNuclIndex(tok,gd);
 							if(nucl<0)
 								printf("Unknown nucleus: %s\n",tok);
-							else
-  							showLevelData(nucl,gd);
+							else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+								{
+  								showLevelData(nucl,gd,0);
+  							}
+  						else
+  							{
+  								if(atoi(tok)<=0)
+  									printf("Invalid number of levels specified: %s\n",tok);
+  								else
+  									showLevelData(nucl,gd,atoi(tok));
+  							}
   					}
   			}
   		else if(strTokCmp(cmd,"ol",0)==0)

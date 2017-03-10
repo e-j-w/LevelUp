@@ -216,7 +216,7 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 					{
 						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
 							{
-								printf("Overlap at energies: %12.1f keV (%s), %7.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+								printf("Overlap at energies: %11.1f keV (%s lv#%2i), %6.1f keV (%s lv#%2i)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,i,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName,j);
 								overlapFound++;
 							}
 					}
@@ -229,7 +229,7 @@ void findOverlappingLevels(int nucl1, int nucl2, gdata *gd)
 						if(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
 							if(!(fudgeNumbers(gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl2].levels[j].gamma_energies[l],2.0)))
 								{
-									printf("Nearby peaks at energies: %7.1f keV (%s), %7.1f keV (%s)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName);
+									printf("Nearby peaks at energies: %6.1f keV (%s lv#%2i), %6.1f keV (%s lv#%2i)\n",gd->nuclData[nucl1].levels[i].gamma_energies[k],gd->nuclData[nucl1].nuclName,i,gd->nuclData[nucl2].levels[j].gamma_energies[l],gd->nuclData[nucl2].nuclName,j);
 									nearbyFound++;
 								}
 					}
@@ -258,37 +258,43 @@ void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, gdata *g
 			}
 }
 
-
-void showLevelData(int nucl, gdata *gd)
+//shows a table of levels
+//numLevels is the number of levels to show (0 -> show all levels)
+void showLevelData(int nucl, gdata *gd, int numLevels)
 {
 	int i,j;
 	double finalEnergy;
 	
-	printf("Printing level data for nucleus %s.  %i levels found.\n",gd->nuclData[nucl].nuclName,gd->nuclData[nucl].numLevels);
-	if(gd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)
+	if(numLevels<0)
+		printf("Printing level data for nucleus %s.  %i levels found.\n",gd->nuclData[nucl].nuclName,gd->nuclData[nucl].numLevels);
+	else
+		printf("Printing level data for nucleus %s.  Showing the first %i levels.\n",gd->nuclData[nucl].nuclName,numLevels);
+	
+	if((gd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)||(numLevels>=MAXLEVELSPERNUCL))
 		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
 	printf("Level Energy    Gamma Energy    Final energy\n       (keV)           (keV)           (keV)\n\n");
 	if(nucl<MAXNUMNUCL)
 		for(i=0;i<gd->nuclData[nucl].numLevels;i++)
-			{
-				if(gd->nuclData[nucl].levels[i].numGammas>0)
-					{
-						finalEnergy=gd->nuclData[nucl].levels[i].energy-gd->nuclData[nucl].levels[i].gamma_energies[0];
-						if(finalEnergy<0)  finalEnergy=0.;
-						printf("  %10.3f      %10.3f      %10.3f\n",gd->nuclData[nucl].levels[i].energy,gd->nuclData[nucl].levels[i].gamma_energies[0],finalEnergy);
-					}
-				else
-					{
-						printf("  %10.3f\n",gd->nuclData[nucl].levels[i].energy);
-					}
-				for(j=1;j<gd->nuclData[nucl].levels[i].numGammas;j++)
-					{
-						finalEnergy=gd->nuclData[nucl].levels[i].energy-gd->nuclData[nucl].levels[i].gamma_energies[j];
-						if(finalEnergy<0)  finalEnergy=0.;
-						printf("                  %10.3f      %10.3f\n",gd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
-					}
-			}
+			if((numLevels<=0)||(i<numLevels))
+				{
+					if(gd->nuclData[nucl].levels[i].numGammas>0)
+						{
+							finalEnergy=gd->nuclData[nucl].levels[i].energy-gd->nuclData[nucl].levels[i].gamma_energies[0];
+							if(finalEnergy<0)  finalEnergy=0.;
+							printf("  %10.3f      %10.3f      %10.3f\n",gd->nuclData[nucl].levels[i].energy,gd->nuclData[nucl].levels[i].gamma_energies[0],finalEnergy);
+						}
+					else
+						{
+							printf("  %10.3f\n",gd->nuclData[nucl].levels[i].energy);
+						}
+					for(j=1;j<gd->nuclData[nucl].levels[i].numGammas;j++)
+						{
+							finalEnergy=gd->nuclData[nucl].levels[i].energy-gd->nuclData[nucl].levels[i].gamma_energies[j];
+							if(finalEnergy<0)  finalEnergy=0.;
+							printf("                  %10.3f      %10.3f\n",gd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
+						}
+				}
 }
 
 void showNZ(int nucl, gdata *gd)
