@@ -32,6 +32,7 @@ typedef struct
   double energy; //level energy in keV
   int numGammas; //number of gamma rays in this level
   double gamma_energies[MAXGAMMASPERLEVEL];
+  double gamma_intensities[MAXGAMMASPERLEVEL];
 }gamma_level; //an individual excited level
 
 typedef struct
