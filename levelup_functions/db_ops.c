@@ -276,6 +276,38 @@ void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, gdata *g
 			}
 }
 
+
+//finds levels matching the specified energy in the region of the specified nucleus
+//(region size is N,Z +/- searchDim)
+void findLevelInRegion(double energy, int nucl, int searchDim, gdata *gd)
+{
+	int i,j,k,l,nind;
+	
+	for(i=gd->nuclData[nucl].N-searchDim;i<=gd->nuclData[nucl].N+searchDim;i++)
+		for(j=gd->nuclData[nucl].Z-searchDim;j<=gd->nuclData[nucl].Z+searchDim;j++)
+			{
+				nind=NZToNuclIndex(i,j,gd);
+				if(nind>=0)
+					for(k=0;k<gd->nuclData[nind].numLevels;k++)
+						for(l=0;l<gd->nuclData[nind].levels[k].numGammas;l++)
+							if(fudgeNumbers(gd->nuclData[nind].levels[k].gamma_energies[l],energy,2.0))
+								printf("%s: contains matching gamma with energy %6.1f keV (lv#%2i).\n",gd->nuclData[nind].nuclName,gd->nuclData[nind].levels[k].gamma_energies[l],k+1);
+			}
+	printf("\n");
+	for(i=gd->nuclData[nucl].N-searchDim;i<=gd->nuclData[nucl].N+searchDim;i++)
+		for(j=gd->nuclData[nucl].Z-searchDim;j<=gd->nuclData[nucl].Z+searchDim;j++)
+			{
+				nind=NZToNuclIndex(i,j,gd);
+				if(nind>=0)
+					for(k=0;k<gd->nuclData[nind].numLevels;k++)
+						for(l=0;l<gd->nuclData[nind].levels[k].numGammas;l++)
+							if(fudgeNumbers(gd->nuclData[nind].levels[k].gamma_energies[l],energy,10.0))
+								if(!(fudgeNumbers(gd->nuclData[nind].levels[k].gamma_energies[l],energy,2.0)))
+								printf("%s: contains nearby gamma with energy %6.1f keV (lv#%2i).\n",gd->nuclData[nind].nuclName,gd->nuclData[nind].levels[k].gamma_energies[l],k+1);
+			}
+}
+
+
 //shows a table of levels
 //numLevels is the number of levels to show (0 -> show all levels)
 void showLevelData(int nucl, gdata *gd, int numLevels)

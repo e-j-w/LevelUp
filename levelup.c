@@ -93,6 +93,8 @@ int main(int argc, char *argv[])
   				printf("                    nucleus NUCL1 and nuclei in the region of\n"); 
   				printf("                    the nucleus NUCL2 (a search width will be\n"); 
   				printf("                    requested)\n\n");
+  				printf("  pfr NUCL - finds gamma rays in the in the region of the nucleus\n"); 
+  				printf("             NUCL which match an energy specified by the user\n\n"); 
   				printf("  nz NUCL - show N, Z numbers for the specified nucleus\n\n");
   				printf("  listnuc, ln - list names of nuclei in the ENSDF database\n\n");
   				printf("  findcasc, fc - find nuclei which match a cascade that you enter\n\n");
@@ -222,6 +224,61 @@ int main(int argc, char *argv[])
 												printf("Invalid search width/height: %i\n",dim);
 											else
 												findOverlappingLevelsInRegion(nucl1,nucl2,dim,gd);
+										}
+								}
+						}
+				}
+			else if(strTokCmp(cmd,"pfr",0)==0)
+  			{
+					strcpy(cmd2,cmd);
+					tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No nucleus specified.\n");
+					else
+						{
+							int nucl=nameToNuclIndex(tok,gd);
+							if(nucl<0)
+								{
+									printf("Unknown nucleus: %s\n",tok);
+								}
+							else
+								{
+									if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
+										{
+											printf("Enter the width/height (in nucleon number) of the region in the nuclear chart to search: ");
+											fgets(cmd,256,stdin);
+											cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+										}
+									else
+										{
+											strcpy(cmd,tok);
+										}
+									int dim=atoi(cmd);
+									if(dim<=0)
+										{
+											printf("Invalid search width/height: %i\n",dim);
+										}
+									else
+										{
+											if((tok = strtok (NULL, " "))==NULL)//read the 4th entry in the command
+												{
+													printf("Enter the energy of the gamma ray to search for: ");
+													fgets(cmd,256,stdin);
+													cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+												}
+											else
+												{
+													strcpy(cmd,tok);
+												}
+											double energy=atof(cmd);
+											if(energy<=0)
+												{
+													printf("Invalid gamma ray energy: %5.1f\n",energy);
+												}
+											else
+												{
+													findLevelInRegion(energy,nucl,dim,gd);
+												}
 										}
 								}
 						}
