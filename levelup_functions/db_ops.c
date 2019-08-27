@@ -320,7 +320,7 @@ void fillSpinPar(gamma_level *gl, char *spstr){
 				strcat(spstr,"(");
 			}
 		}
-		if(gl->spval[i].halfInt){
+		if(gl->spval[i].halfInt == 1){
 			sprintf(val,"%i/2",gl->spval[i].spinVal);
 		}else{
 			sprintf(val,"%i",gl->spval[i].spinVal);

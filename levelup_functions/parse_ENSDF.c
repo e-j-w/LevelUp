@@ -183,22 +183,32 @@ void parseSpinPar(gamma_level * lev, char * spstring){
 	int numTok=0;
 
 	lev->numspinparvals=0;
+	//printf("--------\nstring: %s\n",spstring);
 
+	//check for invalid strings
 	strcpy(str,spstring);
-	tok = strtok (str, ".");
-	if((strcmp(tok,spstring)!=0)||(strcmp(" ",spstring)==0)){
-		//printf("%s\n",tok);
+	tok = strtok (str, " ");
+	if((tok == NULL)){
+		//printf("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
 		//printf("Not a valid spin-parity value.\n");
 		//getc(stdin);
 		return;
 	}
+	/*strcpy(str,spstring);
+	tok = strtok (str, ".");
+	if((tok == NULL)||(strcmp(tok,spstring)!=0)){
+		//printf("%s\n",tok);
+		//printf("Not a valid spin-parity value.\n");
+		//getc(stdin);
+		return;
+	}*/
 
 	strcpy(str,spstring);
-	tok = strtok (str, ",");
+	tok = strtok (str, " ,");
 	strcpy(val[numTok],tok);
 	while (tok != NULL)
 	{
-		tok = strtok (NULL, ",");
+		tok = strtok (NULL, " ,");
 		if(tok!=NULL)
 			{
 				numTok++;
@@ -219,7 +229,6 @@ void parseSpinPar(gamma_level * lev, char * spstring){
 	}
 	printf("\n");*/
 
-	
 	int tentative=0;
 
 	if(numTok<=0){
@@ -278,7 +287,7 @@ void parseSpinPar(gamma_level * lev, char * spstring){
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
 							for(j=0;j<=lev->numspinparvals;j++){
-								lev->spval[j].parVal = -1;
+								lev->spval[j].parVal = 1;
 								tentative = 2;
 							}
 						}
@@ -304,9 +313,10 @@ void parseSpinPar(gamma_level * lev, char * spstring){
 				lev->spval[lev->numspinparvals].tentative = tentative;
 				lev->numspinparvals++;
 
-				//printf("Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->numspinparvals,lev->spval[lev->numspinparvals-1].spinVal,lev->spval[lev->numspinparvals-1].halfInt,lev->spval[lev->numspinparvals-1].parVal,lev->spval[lev->numspinparvals-1].tentative);
+				//printf("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numspinparvals,lev->spval[lev->numspinparvals-1].spinVal,lev->spval[lev->numspinparvals-1].halfInt,lev->spval[lev->numspinparvals-1].parVal,lev->spval[lev->numspinparvals-1].tentative);
 			}
 		}
+		//printf("number of spin vals: %i\n",lev->numspinparvals);
 		
 	}
 
@@ -670,7 +680,10 @@ void readENSDFFile(const char * fileName, ndata * nd)
 													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energy=levelE;
 													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energyerr=levelEerr;
 													//parse the level spin and parity
-													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],val[4]);
+													char spbuff[16];
+													memcpy(spbuff, &line[21], 15);
+													spbuff[15] = '\0';
+													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],spbuff);
 												}
 											else
 												{
