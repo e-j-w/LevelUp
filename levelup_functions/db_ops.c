@@ -376,7 +376,8 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 						}
 					else
 						{
-							printf("  %10.3f\n",nd->nuclData[nucl].levels[i].energy);
+							fillSpinPar(&nd->nuclData[nucl].levels[i],spstr);
+							printf("  %10.3f                                                      %s\n",nd->nuclData[nucl].levels[i].energy,spstr);
 						}
 					for(j=1;j<nd->nuclData[nucl].levels[i].numGammas;j++)
 						{

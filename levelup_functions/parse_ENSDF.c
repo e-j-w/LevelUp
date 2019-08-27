@@ -669,10 +669,18 @@ void readENSDFFile(const char * fileName, ndata * nd)
 									if(strcmp(val[1],"L")==0)
 										{
 											
-										  //printf("Found gamma level at %f keV.\n",atof(val[2]));
+											//printf("Found gamma level at %f keV.\n",atof(val[2]));
 											nd->nuclData[nd->numNucl].numLevels++;
-											double levelE = atof(val[2]);
-											int levelEerr = atoi(val[3]);
+											//parse the energy
+											char ebuff[10];
+											memcpy(ebuff, &line[9], 9);
+											ebuff[9] = '\0';
+											double levelE = atof(ebuff);
+											//parse the energy error
+											char eebuff[3];
+											memcpy(eebuff, &line[19], 2);
+											eebuff[2] = '\0';
+											int levelEerr = atoi(eebuff);
 
 											if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].energy))
 												{
