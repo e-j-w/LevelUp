@@ -15,6 +15,7 @@
 #define MAXCASCDELENGTH 20
 #define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
+#define MAXSPPERLEVEL 3
 #define MAXLEVELSPERNUCL 200
 #define MAXNUMNUCL 3500
 
@@ -28,8 +29,19 @@ typedef struct
 
 typedef struct
 {
+  int halfInt; //if spin-parity value is half integer (1=true, in this case spinVal is multiplied by 0.5)
+  int spinVal; //the spin value (-1 if unknown)
+  int parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
+  int tentative; //0 if not tentative, 1 if all tentative, 2 if only spin tentative, 3 if GE
+}spinparval; //spin parity value
+
+typedef struct
+{
   char sp[10]; //spin parity of the level
   double energy; //level energy in keV
+  int energyerr; //energy uncertainty value
+  int numspinparvals; //number of assigned spin parity values
+  spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
   int numGammas; //number of gamma rays in this level
   double gamma_energies[MAXGAMMASPERLEVEL];
   double gamma_intensities[MAXGAMMASPERLEVEL];
@@ -50,7 +62,7 @@ typedef struct
 {
 	int numNucl; //number of nuclei for which data is stored
 	nucl nuclData[MAXNUMNUCL];
-}gdata; //complete set of gamma data for all nuclei
+}ndata; //complete set of gamma data for all nuclei
 
 
 typedef struct

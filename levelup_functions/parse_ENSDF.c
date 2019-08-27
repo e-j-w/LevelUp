@@ -55,51 +55,51 @@ int lastLevelInCascade(gamma_cascade * c, double energy)
 	return 0;
 }
 
-void generateCascadeData(gdata *gd)
+void generateCascadeData(ndata *nd)
 {
 	int i,j,k,l,m,n;// loop indices (!)
 	int append=0;
 	int ind;
 	
   //generate gamma cascade lists
-	if(gd->numNucl>=0) //check that indices are valid
-	  for(i=0;i<gd->numNucl;i++)
+	if(nd->numNucl>=0) //check that indices are valid
+	  for(i=0;i<nd->numNucl;i++)
 	  	{
-	  		gd->nuclData[i].numCascades=0;//initialize properly
-				if(gd->nuclData[i].numLevels>=0) //check that indices are valid
-					for(j=0;j<gd->nuclData[i].numLevels;j++)
-					  for(k=0;k<gd->nuclData[i].levels[j].numGammas;k++)
+	  		nd->nuclData[i].numCascades=0;//initialize properly
+				if(nd->nuclData[i].numLevels>=0) //check that indices are valid
+					for(j=0;j<nd->nuclData[i].numLevels;j++)
+					  for(k=0;k<nd->nuclData[i].levels[j].numGammas;k++)
 					  	{
 					  		//check whether the level decays to another level
-					  		double trialLevelE = gd->nuclData[i].levels[j].energy - gd->nuclData[i].levels[j].gamma_energies[k];
+					  		double trialLevelE = nd->nuclData[i].levels[j].energy - nd->nuclData[i].levels[j].gamma_energies[k];
 							for(l=0;l<j;l++)
-								if(fudgeNumbers(trialLevelE, gd->nuclData[i].levels[l].energy, 2.)==1)
+								if(fudgeNumbers(trialLevelE, nd->nuclData[i].levels[l].energy, 2.)==1)
 									{
 										
-										//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
-										//printf("Number of cascades: %i\n",gd->nuclData[i].numCascades);
+										//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->nuclData[i].levels[j].energy,nd->nuclData[i].levels[l].energy);
+										//printf("Number of cascades: %i\n",nd->nuclData[i].numCascades);
 											
 										append=0;
 										//see if we can add the level to existing cascade(s)
-										for(m=0;m<gd->nuclData[i].numCascades;m++)
+										for(m=0;m<nd->nuclData[i].numCascades;m++)
 									  	if(m<MAXCASCDESPERNUCL)
-									  		if(gd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
-													if(lastLevelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy))
-														if(gd->nuclData[i].cascades[m].numLevels+1<=MAXCASCDELENGTH)
+									  		if(nd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
+													if(lastLevelInCascade(&nd->nuclData[i].cascades[m], nd->nuclData[i].levels[l].energy))
+														if(nd->nuclData[i].cascades[m].numLevels+1<=MAXCASCDELENGTH)
 													  	{
 													  		//printf("Adding to cascade %i.\n",m+1);
 													  		//add level to existing cascade
-													  		gd->nuclData[i].cascades[m].energies[gd->nuclData[i].cascades[m].numLevels] = gd->nuclData[i].levels[j].energy;
-													  		gd->nuclData[i].cascades[m].numLevels++;
+													  		nd->nuclData[i].cascades[m].energies[nd->nuclData[i].cascades[m].numLevels] = nd->nuclData[i].levels[j].energy;
+													  		nd->nuclData[i].cascades[m].numLevels++;
 													  		append=1;
 													  	}
 										if(append==0)
 											{
 												//see if we can make a new cascade by copying part of an older one
-												if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
-													for(m=0;m<gd->nuclData[i].numCascades;m++)
+												if((nd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+													for(m=0;m<nd->nuclData[i].numCascades;m++)
 														{
-															ind=levelInCascade(&gd->nuclData[i].cascades[m], gd->nuclData[i].levels[l].energy);
+															ind=levelInCascade(&nd->nuclData[i].cascades[m], nd->nuclData[i].levels[l].energy);
 							        				if(ind>=0)
 							        					{
 							        						//printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
@@ -107,13 +107,13 @@ void generateCascadeData(gdata *gd)
 									      					if((ind+2)<MAXCASCDELENGTH)//verify that there is room for a new level
 																		{
 																			//copy the cascade
-																			gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=ind+2;
+																			nd->nuclData[i].cascades[nd->nuclData[i].numCascades].numLevels=ind+2;
 																			for(n=0;n<=ind;n++)
-																				gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[n]=gd->nuclData[i].cascades[m].energies[n];
+																				nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[n]=nd->nuclData[i].cascades[m].energies[n];
 																			//add the new level
-																			gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[ind+1]=gd->nuclData[i].levels[j].energy;
+																			nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[ind+1]=nd->nuclData[i].levels[j].energy;
 																			//increment cascade counter
-																			gd->nuclData[i].numCascades++;
+																			nd->nuclData[i].numCascades++;
 																			break;
 																		}
 																}
@@ -122,56 +122,196 @@ void generateCascadeData(gdata *gd)
 										if(append==0)
 											{
 												//make a brand new cascade
-												if((gd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
+												if((nd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
 													{
 														//printf("Creating new cascade.\n");
-														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].numLevels=2;
-														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[0]=gd->nuclData[i].levels[l].energy;
-														gd->nuclData[i].cascades[gd->nuclData[i].numCascades].energies[1]=gd->nuclData[i].levels[j].energy;
-														gd->nuclData[i].numCascades++;
+														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].numLevels=2;
+														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[0]=nd->nuclData[i].levels[l].energy;
+														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[1]=nd->nuclData[i].levels[j].energy;
+														nd->nuclData[i].numCascades++;
 													}
 											}
 											
 						        }
 						      /*else
 						      	{
-						      		if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+						      		if(strcmp(nd->nuclData[i].nuclName,"68SE")==0)
 						      			{
-										  		printf("j=%i, k=%i, l=%i, numLevels=%i\n",j,k,l,gd->nuclData[i].numLevels);
-										  		printf("-->%s: No cascade detected between levels at energies %f and %f keV.\n",gd->nuclData[i].nuclName,gd->nuclData[i].levels[j].energy,gd->nuclData[i].levels[l].energy);
+										  		printf("j=%i, k=%i, l=%i, numLevels=%i\n",j,k,l,nd->nuclData[i].numLevels);
+										  		printf("-->%s: No cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->nuclData[i].levels[j].energy,nd->nuclData[i].levels[l].energy);
 						      			}
 						      	}*/
 						    }
 						    
 				//dump cascade data
-				/*if(gd->nuclData[i].numCascades>0)
+				/*if(nd->nuclData[i].numCascades>0)
 					{
-						printf("Cascades generated for nucleus: %s\n",gd->nuclData[i].nuclName);
-						for(m=0;m<gd->nuclData[i].numCascades;m++)
+						printf("Cascades generated for nucleus: %s\n",nd->nuclData[i].nuclName);
+						for(m=0;m<nd->nuclData[i].numCascades;m++)
 							{
 								printf("CASCADE %i:\nStep   Level Energy (keV)   Gamma energy (keV)\n",m+1);
-								for(n=0;n<gd->nuclData[i].cascades[m].numLevels;n++)
-									printf("%i      %f\n",n+1,gd->nuclData[i].cascades[m].energies[n]);
+								for(n=0;n<nd->nuclData[i].cascades[m].numLevels;n++)
+									printf("%i      %f\n",n+1,nd->nuclData[i].cascades[m].energies[n]);
 							}
-						//if(strcmp(gd->nuclData[i].nuclName,"68SE")==0)
+						//if(strcmp(nd->nuclData[i].nuclName,"68SE")==0)
 							//getc(stdin);
 			  	}*/
 			}
 	
 	
 	//generate cascade gamma ray energies
-	if(gd->numNucl>=0) //check that indices are valid
-	  for(i=0;i<gd->numNucl;i++)
-	  	for(j=0;j<gd->nuclData[i].numCascades;j++)
-	  		for(k=0;k<gd->nuclData[i].cascades[j].numLevels;k++)
+	if(nd->numNucl>=0) //check that indices are valid
+	  for(i=0;i<nd->numNucl;i++)
+	  	for(j=0;j<nd->nuclData[i].numCascades;j++)
+	  		for(k=0;k<nd->nuclData[i].cascades[j].numLevels;k++)
 	  			{
 	  				if(k==0)
-	  					gd->nuclData[i].cascades[j].gammaEnergies[k]=0.;
+	  					nd->nuclData[i].cascades[j].gammaEnergies[k]=0.;
 	  				else
-	  					gd->nuclData[i].cascades[j].gammaEnergies[k]=gd->nuclData[i].cascades[j].energies[k] - gd->nuclData[i].cascades[j].energies[k-1];
+	  					nd->nuclData[i].cascades[j].gammaEnergies[k]=nd->nuclData[i].cascades[j].energies[k] - nd->nuclData[i].cascades[j].energies[k-1];
 	  			}
 	
 	
+}
+
+//parse spin parity values for a given level
+void parseSpinPar(gamma_level * lev, char * spstring){
+
+	char *tok;
+	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMVALS][256];
+	int i,j;
+	int numTok=0;
+
+	lev->numspinparvals=0;
+
+	strcpy(str,spstring);
+	tok = strtok (str, ".");
+	if((strcmp(tok,spstring)!=0)||(strcmp(" ",spstring)==0)){
+		//printf("%s\n",tok);
+		//printf("Not a valid spin-parity value.\n");
+		//getc(stdin);
+		return;
+	}
+
+	strcpy(str,spstring);
+	tok = strtok (str, ",");
+	strcpy(val[numTok],tok);
+	while (tok != NULL)
+	{
+		tok = strtok (NULL, ",");
+		if(tok!=NULL)
+			{
+				numTok++;
+				if(numTok<MAXNUMVALS){
+					strcpy(val[numTok],tok);
+				}else{
+					numTok--;
+					break;
+				}
+					
+			}
+	}
+	numTok++;
+
+	/*printf("string: %s, number of tokens: %i\n",spstring,numTok);
+	for(i=0;i<numTok;i++){
+		printf("| %s ",val[i]);
+	}
+	printf("\n");*/
+
+	
+	int tentative=0;
+
+	if(numTok<=0){
+		return;
+	}else if(strcmp(val[0],"GE")==0){
+		lev->spval[lev->numspinparvals].tentative = 3;
+		lev->spval[lev->numspinparvals].spinVal = atoi(val[1]);
+		lev->numspinparvals=1;
+		return;
+	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
+		lev->spval[lev->numspinparvals].parVal = 1;
+		lev->spval[lev->numspinparvals].spinVal = -1;
+		lev->numspinparvals=1;
+		return;
+	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
+		lev->spval[lev->numspinparvals].parVal = -1;
+		lev->spval[lev->numspinparvals].spinVal = -1;
+		lev->numspinparvals=1;
+		return;
+	}else{
+		for(i=0;i<numTok;i++){
+			if(i<MAXSPPERLEVEL){
+
+				//check for brackets
+				strcpy(tmpstr,val[i]);
+				tok=strtok(tmpstr,"()");
+				if(tok!=NULL){
+					if(strcmp(tok,val[i])!=0){
+						//printf("setting tentative marker...\n");
+						//tentative marker
+						if(tentative == 0)
+							tentative = 1;
+						else if(tentative == 1)
+							tentative = 0;
+					}
+				}
+
+				//check for parity
+				strcpy(tmpstr,val[i]);
+				tok=strtok(tmpstr,"+-");
+				if(tok!=NULL){
+					if(strcmp(tok,val[i])!=0){
+						//printf("setting parity marker...\n");
+						//contains parity info
+						tok=strtok(val[i],"/(0123456789, ");
+						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
+							lev->spval[lev->numspinparvals].parVal = 1;
+						}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)){
+							lev->spval[lev->numspinparvals].parVal = -1;
+						}else if(strcmp(tok,")-")==0){
+							//all spin values negative parity
+							for(j=0;j<=lev->numspinparvals;j++){
+								lev->spval[j].parVal = -1;
+								tentative = 2;
+							}
+						}else if(strcmp(tok,")+")==0){
+							//all spin values positive parity
+							for(j=0;j<=lev->numspinparvals;j++){
+								lev->spval[j].parVal = -1;
+								tentative = 2;
+							}
+						}
+					}
+				}
+
+				//extract spin
+				lev->spval[lev->numspinparvals].spinVal = -1; //default to unknown spin
+				strcpy(tmpstr,val[i]);
+				tok=strtok(tmpstr,"()+-, ");
+				if(tok!=NULL){
+					strcpy(tmpstr2,tok);
+					tok=strtok(tok,"/");
+					if(strcmp(tok,tmpstr2)!=0){
+						//printf("Detected half-integer spin.\n");
+						lev->spval[lev->numspinparvals].halfInt = 1;
+						lev->spval[lev->numspinparvals].spinVal=atoi(tok);
+					}else{
+						lev->spval[lev->numspinparvals].spinVal=atoi(tmpstr2);
+					}
+				}
+
+				lev->spval[lev->numspinparvals].tentative = tentative;
+				lev->numspinparvals++;
+
+				//printf("Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->numspinparvals,lev->spval[lev->numspinparvals-1].spinVal,lev->spval[lev->numspinparvals-1].halfInt,lev->spval[lev->numspinparvals-1].parVal,lev->spval[lev->numspinparvals-1].tentative);
+			}
+		}
+		
+	}
+
+	//getc(stdin);
+
 }
 
 
@@ -435,22 +575,22 @@ void getNuclNZ(nucl * nuc)
 
 
 //set initial databae values prior to importing data
-void initialize_database(gdata * gd) 
+void initialize_database(ndata * nd) 
 {
 	int i;
 	
-	memset(gd,0,sizeof(gdata));
+	memset(nd,0,sizeof(ndata));
 	
-	gd->numNucl = -1;
+	nd->numNucl = -1;
 	for(i=0;i<MAXNUMNUCL;i++)
 		{
-			gd->nuclData[i].numLevels = -1;
+			nd->nuclData[i].numLevels = -1;
 		}
 }
 
 
 //function to parse ENSDF data files
-void readENSDFFile(const char * fileName, gdata * gd) 
+void readENSDFFile(const char * fileName, ndata * nd) 
 {
 
   FILE *config;
@@ -502,64 +642,64 @@ void readENSDFFile(const char * fileName, gdata * gd)
 					//increment the nucleus if a new nucleus is found
 					if(strcmp(val[1],"ADOPTED")==0)
 						if((strcmp(val[2],"LEVELS")==0)||(strcmp(val[2],"LEVELS,")==0))
-							if(gd->numNucl<MAXNUMNUCL)
+							if(nd->numNucl<MAXNUMNUCL)
 								{
-									gd->numNucl++;
+									nd->numNucl++;
 									subSec=0; //we're at the beginning of the entry for this nucleus 
 									//printf("Adding gamma data for nucleus %s\n",val[0]);
-									strcpy(gd->nuclData[gd->numNucl].nuclName,val[0]);
-									getNuclNZ(&gd->nuclData[gd->numNucl]); //get N and Z
+									strcpy(nd->nuclData[nd->numNucl].nuclName,val[0]);
+									getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
 								}
 							
 					//add gamma levels
-					if(gd->numNucl>=0) //check that indices are valid
-						if(strcmp(val[0],gd->nuclData[gd->numNucl].nuclName)==0)
+					if(nd->numNucl>=0) //check that indices are valid
+						if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 							if(subSec==0)//adopted gamma levels subsection
-								if(gd->nuclData[gd->numNucl].numLevels<MAXLEVELSPERNUCL)
+								if(nd->nuclData[nd->numNucl].numLevels<MAXLEVELSPERNUCL)
 									if(strcmp(val[1],"L")==0)
 										{
 											
 										  //printf("Found gamma level at %f keV.\n",atof(val[2]));
-											gd->nuclData[gd->numNucl].numLevels++;
+											nd->nuclData[nd->numNucl].numLevels++;
 											double levelE = atof(val[2]);
-											if(gd->nuclData[gd->numNucl].numLevels==0)
+											int levelEerr = atoi(val[3]);
+
+											if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].energy))
 												{
 													//the level energy represents a new level
-													gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=levelE;
-												}
-											else if(levelE>gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels-1].energy)
-												{
-													//the level energy represents a new level
-													gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy=levelE;
+													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energy=levelE;
+													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energyerr=levelEerr;
+													//parse the level spin and parity
+													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],val[4]);
 												}
 											else
 												{
 													//the level energy is a repeat
-													gd->nuclData[gd->numNucl].numLevels--;
+													nd->nuclData[nd->numNucl].numLevels--;
 												}
 											
 											
 											
 											//add gamma to cascade if neccessary
-											/*for(i=0;i<gd->nuclData[gd->numNucl].numLevels-1;i++)
+											/*for(i=0;i<nd->nuclData[nd->numNucl].numLevels-1;i++)
 											  {
 											    //check whether the level decays to another level
-											    if(fudgeNumbers(gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].energy, gd->nuclData[gd->numNucl].levels[i].energy)==1)
+											    if(fudgeNumbers(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energy, nd->nuclData[nd->numNucl].levels[i].energy)==1)
 											  }*/
 										}
 					
 					//add gamma rays
-					if(gd->numNucl>=0) //check that indices are valid
-					  if(gd->nuclData[gd->numNucl].numLevels>=0) //check that indices are valid
-						  if(strcmp(val[0],gd->nuclData[gd->numNucl].nuclName)==0)
+					if(nd->numNucl>=0) //check that indices are valid
+					  if(nd->nuclData[nd->numNucl].numLevels>=0) //check that indices are valid
+						  if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 							  if(subSec==0)//adopted gamma levels subsection
-								  if(gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
+								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
 									  if(strcmp(val[1],"G")==0)
 										  {
 										    //printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
-										    gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_energies[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[2]);
-										    gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].gamma_intensities[gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas]=atof(val[4]);
-											  gd->nuclData[gd->numNucl].levels[gd->nuclData[gd->numNucl].numLevels].numGammas++;
+										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(val[2]);
+										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(val[4]);
+											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas++;
 											  
 										  }
 										  
@@ -568,7 +708,7 @@ void readENSDFFile(const char * fileName, gdata * gd)
 		}
 	fclose(config);
 	
-	if(gd->numNucl>=MAXNUMNUCL)
+	if(nd->numNucl>=MAXNUMNUCL)
 		{
 			printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
 			exit(-1);

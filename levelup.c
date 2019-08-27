@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
   
 	FILE *db;
 	//allocate structures
-	gdata *gd=(gdata*)malloc(sizeof(gdata));
-	initialize_database(gd);
+	ndata *nd=(ndata*)malloc(sizeof(ndata));
+	initialize_database(nd);
 	
 	
 	//process the ENSDF database file
@@ -36,21 +36,21 @@ int main(int argc, char *argv[])
 	if((db=fopen(fileName,"r"))==NULL)
 		{
 			printf("ENSDF database file not found, rebuilding database...\n");
-			rebuildDatabase(gd,db);
+			rebuildDatabase(nd,db);
 			db=fopen(fileName,"r");//reopen file for reading
 		}
 	while(i!=1)
 		{	
-			i=fread(gd,sizeof(gdata),1,db);
+			i=fread(nd,sizeof(ndata),1,db);
 			if(i==1)
 				{
-					printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
+					printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",nd->numNucl);
 				}
 			else
 				{
 					j++;
 					printf("ERROR: ENSDF database could not be read from file '%s'.  Rebuilding (attempt %i)...\n",fileName,j);
-					rebuildDatabase(gd,db);
+					rebuildDatabase(nd,db);
 					db=fopen(fileName,"r");//reopen file for reading
 					
 				}
@@ -115,11 +115,11 @@ int main(int argc, char *argv[])
 						printf("No nucleus specified.\n");
 					else
 						{	
-							int nucl=nameToNuclIndex(tok,gd);
+							int nucl=nameToNuclIndex(tok,nd);
 							if(nucl<0)
 								printf("Unknown nucleus: %s\n",tok);
 							else
-  							showCascadeData(nucl,gd);
+  							showCascadeData(nucl,nd);
   					}
   			}
   		else if(strTokCmp(cmd,"lev",0)==0)
@@ -130,19 +130,19 @@ int main(int argc, char *argv[])
 						printf("No nucleus specified.\n");
 					else
 						{
-							int nucl=nameToNuclIndex(tok,gd);
+							int nucl=nameToNuclIndex(tok,nd);
 							if(nucl<0)
 								printf("Unknown nucleus: %s\n",tok);
 							else if((tok = strtok (NULL, " "))==NULL)//read the 3rd entry in the command
 								{
-  								showLevelData(nucl,gd,0);
+  								showLevelData(nucl,nd,0);
   							}
   						else
   							{
   								if(atoi(tok)<=0)
   									printf("Invalid number of levels specified: %s\n",tok);
   								else
-  									showLevelData(nucl,gd,atoi(tok));
+  									showLevelData(nucl,nd,atoi(tok));
   							}
   					}
   			}
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 						printf("No nuclei specified.\n");
 					else
 						{
-							int nucl1=nameToNuclIndex(tok,gd);
+							int nucl1=nameToNuclIndex(tok,nd);
 							if(nucl1<0)
 								{
 									printf("Unknown nucleus: %s\n",tok);
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 								}
 							else
 								{
-									int nucl2=nameToNuclIndex(tok,gd);
+									int nucl2=nameToNuclIndex(tok,nd);
 									if(nucl2<0)
 										{
 											printf("Unknown nucleus: %s\n",tok);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 										}
 									if (findOL)
 										{
-											findOverlappingLevels(nucl1,nucl2,gd);
+											findOverlappingLevels(nucl1,nucl2,nd);
 										}
 								}
 						}
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 						printf("No nuclei specified.\n");
 					else
 						{
-							int nucl1=nameToNuclIndex(tok,gd);
+							int nucl1=nameToNuclIndex(tok,nd);
 							if(nucl1<0)
 								{
 									printf("Unknown nucleus: %s\n",tok);
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 								}
 							else
 								{
-									int nucl2=nameToNuclIndex(tok,gd);
+									int nucl2=nameToNuclIndex(tok,nd);
 									if(nucl2<0)
 										{
 											printf("Unknown nucleus: %s\n",tok);
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 											if(dim<=0)
 												printf("Invalid search width/height: %i\n",dim);
 											else
-												findOverlappingLevelsInRegion(nucl1,nucl2,dim,gd);
+												findOverlappingLevelsInRegion(nucl1,nucl2,dim,nd);
 										}
 								}
 						}
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 						printf("No nucleus specified.\n");
 					else
 						{
-							int nucl=nameToNuclIndex(tok,gd);
+							int nucl=nameToNuclIndex(tok,nd);
 							if(nucl<0)
 								{
 									printf("Unknown nucleus: %s\n",tok);
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 												}
 											else
 												{
-													findLevelInRegion(energy,nucl,dim,gd);
+													findLevelInRegion(energy,nucl,dim,nd);
 												}
 										}
 								}
@@ -291,16 +291,16 @@ int main(int argc, char *argv[])
 						printf("No nucleus specified.\n");
 					else
 						{
-							int nucl=nameToNuclIndex(tok,gd);
+							int nucl=nameToNuclIndex(tok,nd);
 							if(nucl<0)
 								printf("Unknown nucleus: %s\n",tok);
 							else
-  							showNZ(nucl,gd);
+  							showNZ(nucl,nd);
   					}
   			}
   		else if((strcmp(cmd,"listnuc")==0)||(strcmp(cmd,"ln")==0))
   			{
-  				showNuclNames(gd);
+  				showNuclNames(nd);
   			}
   		else if((strcmp(cmd,"findcasc")==0)||(strcmp(cmd,"fc")==0))
   			{
@@ -336,27 +336,27 @@ int main(int argc, char *argv[])
   							c->gammaEnergies[i]=atof(cmd);
   					}
   				if(validE==1)
-  					findCascade(c,c->numLevels,gd);
+  					findCascade(c,c->numLevels,nd);
   				free(c);
   			}
   		else if(strcmp(cmd,"rebuild")==0)
   			{
   				printf("Rebuilding ENSDF database...\n");
-					rebuildDatabase(gd,db);
+					rebuildDatabase(nd,db);
 					db=fopen(fileName,"r");//reopen file for reading
-					i=fread(gd,sizeof(gdata),1,db);
+					i=fread(nd,sizeof(ndata),1,db);
 					while(i!=1)
 						{	
-							i=fread(gd,sizeof(gdata),1,db);
+							i=fread(nd,sizeof(ndata),1,db);
 							if(i==1)
 								{
-									printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",gd->numNucl);
+									printf("ENSDF database retrieved from disk.  Data for %i nuclei found.\n",nd->numNucl);
 								}
 							else
 								{
 									j++;
 									printf("ERROR: ENSDF database could not be read from file '%s'.  Rebuilding (attempt %i)...\n",fileName,j);
-									rebuildDatabase(gd,db);
+									rebuildDatabase(nd,db);
 									db=fopen(fileName,"r");//reopen file for reading
 					
 								}
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
 											peak_fit_par pfpar = findPeak(sp->sumHist,cntr,5.,20);
 											reportPeakPositions(&pfpar);
 											//find matching cascades
-											findCascadeInSpec(&pfpar,gd);
+											findCascadeInSpec(&pfpar,nd);
 										}
 								}
 							free(sp);
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
 													peak_fit_par pfpar = findPeak(sp->sumHist,cntr,3.,50);
 													//reportPeakPositions(&pfpar);
 													//find matching cascades
-													findCascadeFromGammaEInSpec(&pfpar,gd,ge);
+													findCascadeFromGammaEInSpec(&pfpar,nd,ge);
 												}
 											
 										}
