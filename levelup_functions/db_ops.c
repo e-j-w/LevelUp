@@ -307,7 +307,7 @@ void findLevelInRegion(double energy, int nucl, int searchDim, ndata *nd)
 			}
 }
 
-void fillSpinPar(gamma_level *gl, char *spstr){
+void fillSpinPar(level *gl, char *spstr){
 
 	int i;
 	char val[256];

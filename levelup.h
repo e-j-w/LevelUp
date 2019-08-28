@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 //spectrum data file specs
 #define S32K 32768
@@ -37,15 +38,17 @@ typedef struct
 
 typedef struct
 {
-  char sp[10]; //spin parity of the level
   double energy; //level energy in keV
   int energyerr; //energy uncertainty value
+  double lifetime; //level lifetime
+  int lifetimeUnit; //units for level lifetime
+  int lifetimeErr; //lifetime uncertainty value
   int numspinparvals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
   int numGammas; //number of gamma rays in this level
   double gamma_energies[MAXGAMMASPERLEVEL];
   double gamma_intensities[MAXGAMMASPERLEVEL];
-}gamma_level; //an individual excited level
+}level; //an individual excited level
 
 typedef struct
 {
@@ -53,7 +56,7 @@ typedef struct
 	int N; //neutrons in nucleus
 	int Z; //protons in nucleus
 	int numLevels; //number of excited levels in this nucleus
-	gamma_level levels[MAXLEVELSPERNUCL]; //levels belonging to the nucleus
+	level levels[MAXLEVELSPERNUCL]; //levels belonging to the nucleus
 	int numCascades; //number of cascades stored for this nucleus
 	gamma_cascade cascades[MAXCASCDESPERNUCL]; //cascades belonging to the nucleus
 }nucl; //gamma data for a given nucleus

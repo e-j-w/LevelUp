@@ -175,7 +175,7 @@ void generateCascadeData(ndata *nd)
 }
 
 //parse spin parity values for a given level
-void parseSpinPar(gamma_level * lev, char * spstring){
+void parseSpinPar(level * lev, char * spstring){
 
 	char *tok;
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMVALS][256];
@@ -594,10 +594,19 @@ void initialize_database(ndata * nd)
 	nd->numNucl = -1;
 	for(i=0;i<MAXNUMNUCL;i++)
 		{
-			nd->nuclData[i].numLevels = -1;
+			nd->nuclData[i].numLevels = 0;
 		}
 }
 
+//checks whether a string is all whitespace and returns 1 if true
+int isEmpty(const char *str) {
+  while (*str != '\0') {
+    if (!isspace((unsigned char)*str))
+      return 0;
+    str++;
+  }
+  return 1;
+}
 
 //function to parse ENSDF data files
 void readENSDFFile(const char * fileName, ndata * nd) 
@@ -626,7 +635,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
 				{
 					//sscanf(str,"%s",str1);
 					strcpy(line,str); //store the entire line
-					if(strcmp(str,"")==0)
+					if(isEmpty(str))
 						{
 							subSec++; //empty line, increment which subsection we're on
 						}
@@ -663,10 +672,10 @@ void readENSDFFile(const char * fileName, ndata * nd)
 								getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
 							}
 
-					//parse the nucleus name
+					/*//parse the nucleus name
 					char nbuff[7];
 					memcpy(nbuff, &line[0], 6);
-					nbuff[6] = '\0';
+					nbuff[6] = '\0';*/
 
 					//parse the line type
 					char typebuff[3];
@@ -685,7 +694,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
 								if(nd->nuclData[nd->numNucl].numLevels<MAXLEVELSPERNUCL)
 									if(strcmp(typebuff," L")==0)
 										{
-											nd->nuclData[nd->numNucl].numLevels++;
+											
 											
 											double levelE = atof(ebuff);
 											//printf("Found gamma level at %f keV.\n",atof(ebuff));
@@ -705,11 +714,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
 													memcpy(spbuff, &line[21], 15);
 													spbuff[15] = '\0';
 													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],spbuff);
-												}
-											else
-												{
-													//the level energy is a repeat
-													nd->nuclData[nd->numNucl].numLevels--;
+													nd->nuclData[nd->numNucl].numLevels++;
 												}
 											
 											
@@ -724,10 +729,10 @@ void readENSDFFile(const char * fileName, ndata * nd)
 					
 					//add gamma rays
 					if(nd->numNucl>=0) //check that indices are valid
-					  if(nd->nuclData[nd->numNucl].numLevels>=0) //check that indices are valid
+					  if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
 						  if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 							  if(subSec==0)//adopted gamma levels subsection
-								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
+								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas<MAXGAMMASPERLEVEL)
 									  if(strcmp(typebuff," G")==0)
 										  {
 											//parse the gamma intensity
@@ -735,10 +740,10 @@ void readENSDFFile(const char * fileName, ndata * nd)
 											memcpy(ibuff, &line[21], 7);
 											ibuff[7] = '\0';
 										    
-										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(ebuff);
+										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas]=atof(ebuff);
 										    //printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
-											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(ibuff);
-											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas++;
+											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas]=atof(ibuff);
+											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas++;
 											  
 										  }
 										  
