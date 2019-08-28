@@ -13,20 +13,118 @@ int nameToNuclIndex(const char * name, ndata *nd)
 int NZToNuclIndex(int N, int Z, ndata *nd)
 {
 	int i;
-		for(i=0;i<nd->numNucl;i++)
-			if(nd->nuclData[i].N==N)
-				if(nd->nuclData[i].Z==Z)
-					return i;
+	for(i=0;i<nd->numNucl;i++)
+		if(nd->nuclData[i].N==N)
+			if(nd->nuclData[i].Z==Z)
+				return i;
 	
 	return -1;//negative value indicates failure
+}
+
+int isNuclRadioactive(int nucl, ndata *nd)
+{
+	int i;
+	for(i=0;i<nd->nuclData[nucl].numLevels;i++){
+		if(nd->nuclData[nucl].levels[i].energy <= 0.0){
+			if(nd->nuclData[nucl].levels[i].lifetimeUnit == -1){
+				return 0;
+			}else{
+				return 1;
+			}
+		}
+	}
+	printf("Could not find ground state data for nucleus %s, unknown if it is radioactive.\n",nd->nuclData[nucl].nuclName);
+	return 0;
+}
+
+//returns:
+//0=not on any shell closure
+//1=on neutron shell closure
+//2=on proton shell closure
+//3=on neutron AND proton shell closure
+//4=on neuton subshell closure
+//5=on proton subshell closure
+//6=on neutron AND proton subshell closure
+//7=on neutron shell AND proton subshell closure
+//8=on neutron subshell AND proton shell closure
+int isNuclOnShellClosure(int nucl, ndata *nd)
+{
+	int protonShell=0;
+	int neutronShell=0;
+
+	if((nd->nuclData[nucl].Z == 2)||(nd->nuclData[nucl].Z == 8)||(nd->nuclData[nucl].Z == 20)||(nd->nuclData[nucl].Z == 28)||(nd->nuclData[nucl].Z == 50)||(nd->nuclData[nucl].Z == 82)){
+		protonShell = 1;
+	}else if((nd->nuclData[nucl].Z == 6)||(nd->nuclData[nucl].Z == 14)||(nd->nuclData[nucl].Z == 16)||(nd->nuclData[nucl].Z == 32)||(nd->nuclData[nucl].Z == 38)||(nd->nuclData[nucl].Z == 40)||(nd->nuclData[nucl].Z == 58)||(nd->nuclData[nucl].Z == 64)||(nd->nuclData[nucl].Z == 76)||(nd->nuclData[nucl].Z == 80)){
+		protonShell = 2;
+	}
+		
+
+	if((nd->nuclData[nucl].N == 2)||(nd->nuclData[nucl].N == 8)||(nd->nuclData[nucl].N == 20)||(nd->nuclData[nucl].N == 28)||(nd->nuclData[nucl].N == 50)||(nd->nuclData[nucl].N == 82)||(nd->nuclData[nucl].N == 126)){
+		neutronShell = 1;
+	}else if((nd->nuclData[nucl].N == 6)||(nd->nuclData[nucl].N == 14)||(nd->nuclData[nucl].N == 16)||(nd->nuclData[nucl].N == 32)||(nd->nuclData[nucl].N == 38)||(nd->nuclData[nucl].N == 40)||(nd->nuclData[nucl].N == 58)||(nd->nuclData[nucl].N == 64)||(nd->nuclData[nucl].N == 76)||(nd->nuclData[nucl].N == 80)){
+		neutronShell = 2;
+	}
+	
+	if((protonShell==0)&&(neutronShell==0))
+		return 0;
+	if((protonShell==0)&&(neutronShell==1))
+		return 1;
+	if((protonShell==1)&&(neutronShell==0))
+		return 2;
+	if((protonShell==1)&&(neutronShell==1))
+		return 3;
+	if((protonShell==0)&&(neutronShell==2))
+		return 4;
+	if((protonShell==2)&&(neutronShell==0))
+		return 5;
+	if((protonShell==2)&&(neutronShell==2))
+		return 6;
+	if((protonShell==2)&&(neutronShell==1))
+		return 7;
+	if((protonShell==1)&&(neutronShell==2))
+		return 8;
+	
+	printf("WARNING: unknown shell closure for nucleus %s (%i %i)\n",nd->nuclData[nucl].nuclName,protonShell,neutronShell);
+	return 0;
+}
+void fillShellClosure(int nucl, ndata *nd, char *scstr){
+
+	int scval = isNuclOnShellClosure(nucl,nd);
+
+	strcpy(scstr,""); //clear the string
+	if(scval == 0)
+		strcpy(scstr,"not on a shell closure");
+	else if(scval == 1)
+		strcpy(scstr,"on a neutron shell closure");
+	else if(scval == 2)
+		strcpy(scstr,"on a proton shell closure");
+	else if(scval == 3)
+		strcpy(scstr,"on a double shell closure");
+	else if(scval == 4)
+		strcpy(scstr,"on a neutron subshell closure");
+	else if(scval == 5)
+		strcpy(scstr,"on a proton subshell closure");
+	else if(scval == 6)
+		strcpy(scstr,"on a double subshell closure");
+	else if(scval == 7)
+		strcpy(scstr,"on a proton subshell and a neutron shell closure");
+	else if(scval == 8)
+		strcpy(scstr,"on a proton shell and a neutron subshell closure");
+
 }
 
 void showCascadeData(int nucl, ndata *nd)
 {
 	//dump cascade data
 	int m,n;
-	
-	printf("Printing cascade data for nucleus %s.  %i cascades found.\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].numCascades);
+
+	printf("Printing cascade data for the ");
+	if(isNuclRadioactive(nucl,nd)){
+		printf("radioactive");
+	}else{
+		printf("stable");
+	}
+	printf(" nucleus %s.  %i cascades found.\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].numCascades);
 	if(nd->nuclData[nucl].numCascades>=MAXCASCDESPERNUCL)
 		printf("NOTE: cascade listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXCASCDESPERNUCL in 'levelup.h'.\n");
 	
@@ -398,15 +496,22 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 	double finalEnergy;
 	char spstr[256],ltstr[256];
 	
+	printf("Printing level data for the ");
+	if(isNuclRadioactive(nucl,nd)){
+		printf("radioactive");
+	}else{
+		printf("stable");
+	}
+	printf(" nucleus %s.  ",nd->nuclData[nucl].nuclName);
 	if(numLevels<=0)
-		printf("Printing level data for nucleus %s.  %i levels found.\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].numLevels);
+		printf("%i levels found.\n",nd->nuclData[nucl].numLevels);
 	else
-		printf("Printing level data for nucleus %s.  Showing the first %i levels.\n",nd->nuclData[nucl].nuclName,numLevels);
+		printf("Showing the first %i levels.\n",numLevels);
 	
 	if((nd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)||(numLevels>=MAXLEVELSPERNUCL))
 		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
-	printf(" Level Energy  Gamma Energy  Intensity    Final E              Jpi       Lifetime\n        (keV)         (keV)                 (keV)\n\n");
+	printf("\n Level Energy  Gamma Energy  Intensity    Final E              Jpi       Lifetime\n        (keV)         (keV)                 (keV)\n\n");
 	if(nucl<MAXNUMNUCL)
 		for(i=0;i<nd->nuclData[nucl].numLevels;i++)
 			if((numLevels<=0)||(i<numLevels))
@@ -443,7 +548,10 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 
 void showNZ(int nucl, ndata *nd)
 {
+	char scstr[256];
+	fillShellClosure(nucl,nd,scstr);
 	printf("For nucleus %s: N = %i, Z = %i\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].N,nd->nuclData[nucl].Z);
+	printf("This nucleus is %s.\n",scstr);
 }
 
 void showNuclNames(ndata *nd)
