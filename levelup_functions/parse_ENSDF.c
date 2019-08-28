@@ -650,23 +650,30 @@ void readENSDFFile(const char * fileName, ndata * nd)
 					}
 					
 					//increment the nucleus if a new nucleus is found
-					if(strcmp(val[1],"ADOPTED")==0)
-						if((strcmp(val[2],"LEVELS")==0)||(strcmp(val[2],"LEVELS,")==0))
-							if(nd->numNucl<MAXNUMNUCL)
-								{
-									nd->numNucl++;
-									subSec=0; //we're at the beginning of the entry for this nucleus 
-									//printf("Adding gamma data for nucleus %s\n",val[0]);
-									strcpy(nd->nuclData[nd->numNucl].nuclName,val[0]);
-									getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
-								}
-							
+					char hbuff[15];
+					memcpy(hbuff, &line[9], 14);
+					hbuff[14] = '\0';
+					if(strcmp(hbuff,"ADOPTED LEVELS")==0)
+						if(nd->numNucl<MAXNUMNUCL)
+							{
+								nd->numNucl++;
+								subSec=0; //we're at the beginning of the entry for this nucleus 
+								//printf("Adding gamma data for nucleus %s\n",val[0]);
+								strcpy(nd->nuclData[nd->numNucl].nuclName,val[0]);
+								getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
+							}
+
+					//get the line type
+					char typebuff[3];
+					memcpy(typebuff, &line[6], 2);
+					typebuff[2] = '\0';
+
 					//add gamma levels
 					if(nd->numNucl>=0) //check that indices are valid
 						if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 							if(subSec==0)//adopted gamma levels subsection
 								if(nd->nuclData[nd->numNucl].numLevels<MAXLEVELSPERNUCL)
-									if(strcmp(val[1],"L")==0)
+									if(strcmp(typebuff," L")==0)
 										{
 											
 											//printf("Found gamma level at %f keV.\n",atof(val[2]));
@@ -715,7 +722,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
 						  if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 							  if(subSec==0)//adopted gamma levels subsection
 								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
-									  if(strcmp(val[1],"G")==0)
+									  if(strcmp(typebuff," G")==0)
 										  {
 										    //printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
 										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(val[2]);
