@@ -663,10 +663,20 @@ void readENSDFFile(const char * fileName, ndata * nd)
 								getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
 							}
 
-					//get the line type
+					//parse the nucleus name
+					char nbuff[7];
+					memcpy(nbuff, &line[0], 6);
+					nbuff[6] = '\0';
+
+					//parse the line type
 					char typebuff[3];
 					memcpy(typebuff, &line[6], 2);
 					typebuff[2] = '\0';
+
+					//parse the energy
+					char ebuff[10];
+					memcpy(ebuff, &line[9], 9);
+					ebuff[9] = '\0';
 
 					//add gamma levels
 					if(nd->numNucl>=0) //check that indices are valid
@@ -675,14 +685,10 @@ void readENSDFFile(const char * fileName, ndata * nd)
 								if(nd->nuclData[nd->numNucl].numLevels<MAXLEVELSPERNUCL)
 									if(strcmp(typebuff," L")==0)
 										{
-											
-											//printf("Found gamma level at %f keV.\n",atof(val[2]));
 											nd->nuclData[nd->numNucl].numLevels++;
-											//parse the energy
-											char ebuff[10];
-											memcpy(ebuff, &line[9], 9);
-											ebuff[9] = '\0';
+											
 											double levelE = atof(ebuff);
+											//printf("Found gamma level at %f keV.\n",atof(ebuff));
 											//parse the energy error
 											char eebuff[3];
 											memcpy(eebuff, &line[19], 2);
@@ -724,9 +730,14 @@ void readENSDFFile(const char * fileName, ndata * nd)
 								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas<MAXGAMMASPERLEVEL)
 									  if(strcmp(typebuff," G")==0)
 										  {
-										    //printf("-> Found gamma ray with energy %f keV.\n",atof(val[2]));
-										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(val[2]);
-										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(val[4]);
+											//parse the gamma intensity
+											char ibuff[8];
+											memcpy(ibuff, &line[21], 7);
+											ibuff[7] = '\0';
+										    
+										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(ebuff);
+										    //printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
+											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas]=atof(ibuff);
 											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].numGammas++;
 											  
 										  }
