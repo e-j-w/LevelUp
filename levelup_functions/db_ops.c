@@ -113,6 +113,44 @@ void fillShellClosure(int nucl, ndata *nd, char *scstr){
 
 }
 
+void rankNuclides(nuclide_rank_par * nrp, ndata *nd){
+
+	nuclide_rank_info *nri=(nuclide_rank_info*)malloc(sizeof(nuclide_rank_info));
+	int i;
+
+	for(i=0;i<nd->numNucl;i++){
+		nri->nucl[i]=i;
+		nri->rankVal[i] = 1.0; //starting value
+		if(isNuclRadioactive(i,nd)){
+			nri->rankVal[i] *= nrp->radioactive;
+		}
+		if((isNuclOnShellClosure(i,nd)==1)||(isNuclOnShellClosure(i,nd)==2)||(isNuclOnShellClosure(i,nd)==7)||(isNuclOnShellClosure(i,nd)==8)){
+			nri->rankVal[i] *= nrp->onShellClosure;
+		}
+		if(isNuclOnShellClosure(i,nd)==3){
+			nri->rankVal[i] *= nrp->onShellClosure*nrp->onShellClosure;
+		}
+		if((isNuclOnShellClosure(i,nd)==4)||(isNuclOnShellClosure(i,nd)==5)||(isNuclOnShellClosure(i,nd)==7)||(isNuclOnShellClosure(i,nd)==8)){
+			nri->rankVal[i] *= nrp->onSubshellClosure;
+		}
+		if(isNuclOnShellClosure(i,nd)==6){
+			nri->rankVal[i] *= nrp->onSubshellClosure*nrp->onSubshellClosure;
+		}
+
+		//apply exclusion condition(s)	
+		if((nrp->excludeStable)&&(isNuclRadioactive(i,nd)==0)){
+			nri->rankVal[i] = 0.;
+		}
+
+		if(nri->rankVal[i] > 0.){
+			printf("Rank value for nucleus %s: %6.3f\n",nd->nuclData[i].nuclName,nri->rankVal[i]);
+		}
+			
+	}
+
+	free(nri);
+}
+
 void showCascadeData(int nucl, ndata *nd)
 {
 	//dump cascade data

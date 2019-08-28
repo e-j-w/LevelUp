@@ -1,3 +1,5 @@
+#include "read_data.h"
+
 //function reads an .mca file into a double array and returns the number of spectra read in
 int readMCA(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
 {
@@ -99,3 +101,81 @@ int readDataFile(const char * filename, double outHist[NSPECT][S32K])
 	
 	return numSpec;
 }
+
+int readNuclideRankParameters(const char * filename, nuclide_rank_par * nrpar)
+{
+	// Read parameters from text file
+	char *tok;
+	char str[256],fullLine[256],parameter[256],value[256];
+
+	FILE *parfile;
+
+	if((parfile=fopen(filename,"r"))==NULL)
+		{
+			printf("Cannot open the input file: %s\n",filename);
+			printf("Check that the file exists.\n");
+			return 0;
+			//exit(-1);
+		}
+	else
+		{
+			while(!(feof(parfile)))//go until the end of file is reached
+				{
+					if(fgets(str,256,parfile)!=NULL) //get an entire line
+						{
+							strcpy(fullLine,str);
+								tok=strtok(str,"[");
+							if(tok!=NULL){
+								tok[strcspn(tok, "\r\n")] = 0;//strips newline characters from the string
+								strcpy(parameter,tok);
+								tok = strtok (NULL, "]");
+								if(tok!=NULL){
+									tok[strcspn(tok, "\r\n")] = 0;//strips newline characters from the string
+									strcpy(value,tok);
+									if((parameter!=NULL)&&(value!=NULL)){
+										if(strcmp(parameter,"on_shell_closure")==0){
+											nrpar->onShellClosure = atof(value);
+										}else if(strcmp(parameter,"on_subshell_closure")==0){
+											nrpar->onSubshellClosure = atof(value);
+										}else if(strcmp(parameter,"radioactive")==0){
+											nrpar->radioactive = atof(value);
+										}else if(strcmp(parameter,"low_relative_level_density")==0){
+											nrpar->lowRelativeLevelDensity = atof(value);
+										}else if(strcmp(parameter,"high_relative_level_density")==0){
+											nrpar->highRelativeLevelDensity = atof(value);
+										}else if(strcmp(parameter,"max_distance_from_stability")==0){
+											nrpar->maxDistFromStability = atoi(value);
+										}else if(strcmp(parameter,"exclude_stable_nuclides")==0){
+											if(strcmp(value,"yes")==0){
+												nrpar->excludeStable = 1;
+											}else{
+												nrpar->excludeStable = 0;
+											}
+										}
+									}
+								}
+							}
+						}
+				}
+
+			printf("\nFile '%s' read sucessfully!\n",filename);
+			/*printf("Listing of weights:\n");
+			printf("on_shell_closure = %.2f \n",nrpar->onShellClosure);
+			printf("on_subshell_closure = %.2f \n",nrpar->onSubshellClosure);
+			printf("radioactive = %.2f \n",nrpar->radioactive);
+			printf("low_relative_level_density = %.2f \n",nrpar->lowRelativeLevelDensity);
+			printf("high_relative_level_density = %.2f \n",nrpar->highRelativeLevelDensity);
+			printf("Other parameters:\n");
+			printf("max_distance_from_stability = %i \n",nrpar->maxDistFromStability);
+			if(nrpar->excludeStable == 1){
+				printf("Excluding stable nucluides.\n");
+			}else{
+				printf("Not excluding stable nucluides.\n");
+			}*/
+		}
+
+	fclose(parfile);
+	return 1;
+}
+
+

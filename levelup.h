@@ -23,6 +23,12 @@
 //structures
 typedef struct
 {
+  int nucl[MAXNUMNUCL]; //nuclide indices
+  double rankVal[MAXNUMNUCL]; //nuclide rank values
+}nuclide_rank_info; //an individual gamma cascade
+
+typedef struct
+{
   int numLevels; //number of steps in the cascade
   double energies[MAXCASCDELENGTH]; //energies of the levels in the cascade in keV
   double gammaEnergies[MAXCASCDELENGTH];

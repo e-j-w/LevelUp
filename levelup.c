@@ -484,6 +484,22 @@ int main(int argc, char *argv[])
   			
   				
   			}
+		else if(strTokCmp(cmd,"rank",0)==0)
+  			{
+  				strcpy(cmd2,cmd);
+  				tok=strtok (cmd2," ");
+					if((tok = strtok (NULL, " "))==NULL)//read the 2nd entry in the command
+						printf("No filename specified.\n");
+					else
+						{
+							printf("Ranking nuclides using parameters from file: %s.\n",tok);
+							nuclide_rank_par *nrp=(nuclide_rank_par*)malloc(sizeof(nuclide_rank_par));
+							if(readNuclideRankParameters(tok,nrp)==1){
+								rankNuclides(nrp,nd);
+							}
+							free(nrp);
+  						}
+  			}
   		else if(strcmp(cmd,"")==0)
   			{
   				//do nothing

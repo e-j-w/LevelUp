@@ -174,6 +174,7 @@ void generateCascadeData(ndata *nd)
 	
 }
 
+
 //parse lifetime values for a given level
 void parseLifetime(level * lev, char * ltstring){
 
