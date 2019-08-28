@@ -1,4 +1,4 @@
-CFLAGS   = -I./levelup_functions -lm -o2 -Wall
+CFLAGS   = -I./levelup_functions -lm -o2 -Wall -lreadline
 
 all: levelup
 

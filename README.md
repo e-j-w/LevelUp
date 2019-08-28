@@ -20,11 +20,19 @@ Right now the program's capabilities are fairly limited, but more will be added 
 
 ## How to Install
 
+### Dependencies
+
+* gcc
+* make
+* readline
+
+The current version has been tested under Centos 7.
+
+### Instructions
+
 Use `make` to compile.  To run the program from anywhere, move the resulting `levelup` executable to any directory under your `PATH` environment variable.
 
 The environment variable `ENSDF` pointing to a directory containing unzipped ENSDF data files must be defined in order for the program to run.  Running the program without this variable defined will display an error message.
-
-Tested using gcc and GNU make on Centos 7 and Arch Linux (as of March 2017).  The code is self-contained and should work on more or less any Linux distro.
 
 ## Notes
 
@@ -36,7 +44,4 @@ Some functions in this program allow for analysis of gamma-ray spectra.  The pro
 
 **.spe** - An .spe file is the data type written by radware when using the 'ws' command in gf3.
 
-### Command Line History
-
-This can be obtained using the `rlwrap` utility.  Install `rlwrap` (on Ubuntu: `sudo apt-get install rlwrap`) and then run the program using `rlwrap levelup`.
 

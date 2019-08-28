@@ -64,15 +64,21 @@ int main(int argc, char *argv[])
 	fclose(db);
 	
 	
+	
+    rl_bind_key('\t', rl_complete); // Configure readline to auto-complete on tab key
+
 	//process user commands
 	printf("\nEnter command.  Enter 'help' for a list of commands.\n");
-	char cmd[256],cmd2[256];
+	char cmd2[256];
 	char *tok;
 	while(1)
 		{
-			printf("LevelUp > ");
-  		fgets(cmd,256,stdin);
-  		cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
+			// setup readline prompt and add commands to history
+        	char* cmd = readline("LevelUp > ");
+			add_history(cmd);
+        	
+
+  		//cmd[strcspn(cmd, "\r\n")] = 0;//strips newline characters from the string read by fgets
   		if(strcmp(cmd,"help")==0)
   			{
   				printf("\nCommand list:\n\n");

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 //spectrum data file specs
 #define S32K 32768
