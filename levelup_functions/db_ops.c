@@ -342,13 +342,61 @@ void fillSpinPar(level *gl, char *spstr){
 	}
 }
 
+void fillLifetime(level *gl, char *ltstr){
+
+	char val[256];
+
+	strcpy(ltstr,""); //clear the string
+
+	if(gl->lifetime >=0){
+		if(gl->lifetimeUnit < 0){
+			strcat(ltstr,"STABLE");
+		}else{
+			sprintf(val,"%0.3f ",gl->lifetime);
+			strcat(ltstr,val);
+			if(gl->lifetimeUnit == 0){
+				strcat(ltstr,"years");
+			}else if(gl->lifetimeUnit == 1){
+				strcat(ltstr,"days");
+			}else if(gl->lifetimeUnit == 2){
+				strcat(ltstr,"hours");
+			}else if(gl->lifetimeUnit == 3){
+				strcat(ltstr,"minutes");
+			}else if(gl->lifetimeUnit == 4){
+				strcat(ltstr,"s");
+			}else if(gl->lifetimeUnit == 5){
+				strcat(ltstr,"ms");
+			}else if(gl->lifetimeUnit == 6){
+				strcat(ltstr,"us");
+			}else if(gl->lifetimeUnit == 7){
+				strcat(ltstr,"ns");
+			}else if(gl->lifetimeUnit == 8){
+				strcat(ltstr,"ps");
+			}else if(gl->lifetimeUnit == 9){
+				strcat(ltstr,"fs");
+			}else if(gl->lifetimeUnit == 10){
+				strcat(ltstr,"as");
+			}else if(gl->lifetimeUnit == 11){
+				strcat(ltstr,"eV");
+			}else if(gl->lifetimeUnit == 12){
+				strcat(ltstr,"keV");
+			}else if(gl->lifetimeUnit == 13){
+				strcat(ltstr,"MeV");
+			}else{
+				strcat(ltstr,"??");
+			}
+		}
+	}
+
+}
+
 //shows a table of levels
 //numLevels is the number of levels to show (0 -> show all levels)
 void showLevelData(int nucl, ndata *nd, int numLevels)
 {
 	int i,j;
 	double finalEnergy;
-	char spstr[256];
+	char spstr[256],ltstr[256];
 	
 	if(numLevels<=0)
 		printf("Printing level data for nucleus %s.  %i levels found.\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].numLevels);
@@ -358,7 +406,7 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 	if((nd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)||(numLevels>=MAXLEVELSPERNUCL))
 		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
-	printf("Level Energy    Gamma Energy       Intensity    Final energy      Jpi\n       (keV)           (keV)                           (keV)\n\n");
+	printf(" Level Energy  Gamma Energy  Intensity    Final E              Jpi       Lifetime\n        (keV)         (keV)                 (keV)\n\n");
 	if(nucl<MAXNUMNUCL)
 		for(i=0;i<nd->nuclData[nucl].numLevels;i++)
 			if((numLevels<=0)||(i<numLevels))
@@ -369,24 +417,26 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 							if(finalEnergy<0)  
 								finalEnergy=0.;
 							fillSpinPar(&nd->nuclData[nucl].levels[i],spstr);
+							fillLifetime(&nd->nuclData[nucl].levels[i],ltstr);
 							if(nd->nuclData[nucl].levels[i].gamma_intensities[0]>0)
-								printf("  %10.3f      %10.3f      %10.1f      %10.3f      %s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],nd->nuclData[nucl].levels[i].gamma_intensities[0],finalEnergy,spstr);
+								printf("%13.3f %13.3f %10.1f %10.3f %16s %14s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],nd->nuclData[nucl].levels[i].gamma_intensities[0],finalEnergy,spstr,ltstr);
 							else
-								printf("  %10.3f      %10.3f         unknown      %10.3f      %s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],finalEnergy,spstr);
+								printf("%13.3f %13.3f    unknown %10.3f %16s %14s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],finalEnergy,spstr,ltstr);
 						}
 					else
 						{
 							fillSpinPar(&nd->nuclData[nucl].levels[i],spstr);
-							printf("  %10.3f                                                      %s\n",nd->nuclData[nucl].levels[i].energy,spstr);
+							fillLifetime(&nd->nuclData[nucl].levels[i],ltstr);
+							printf("%13.3f                                     %16s %14s\n",nd->nuclData[nucl].levels[i].energy,spstr,ltstr);
 						}
 					for(j=1;j<nd->nuclData[nucl].levels[i].numGammas;j++)
 						{
 							finalEnergy=nd->nuclData[nucl].levels[i].energy-nd->nuclData[nucl].levels[i].gamma_energies[j];
 							if(finalEnergy<0)  finalEnergy=0.;
 							if(nd->nuclData[nucl].levels[i].gamma_intensities[j]>0)
-								printf("                  %10.3f      %10.1f      %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],nd->nuclData[nucl].levels[i].gamma_intensities[j],finalEnergy);
+								printf("              %13.3f %10.1f %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],nd->nuclData[nucl].levels[i].gamma_intensities[j],finalEnergy);
 							else
-								printf("                  %10.3f         unknown      %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
+								printf("              %13.3f    unknown %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
 						}
 				}
 }

@@ -174,6 +174,83 @@ void generateCascadeData(ndata *nd)
 	
 }
 
+//parse lifetime values for a given level
+void parseLifetime(level * lev, char * ltstring){
+
+	char *tok;
+	char str[256], val[MAXNUMVALS][256];
+	int numTok=0;
+
+	lev->lifetime=-1;
+	lev->lifetimeErr=-1;
+
+	strcpy(str,ltstring);
+	tok = strtok (str, " ?");
+	if((tok == NULL)){
+		return;
+	}
+	strcpy(val[numTok],tok);
+	while (tok != NULL)
+	{
+		tok = strtok (NULL, " ?");
+		if(tok!=NULL)
+			{
+				numTok++;
+				if(numTok<MAXNUMVALS){
+					strcpy(val[numTok],tok);
+				}else{
+					numTok--;
+					break;
+				}
+					
+			}
+	}
+	numTok++;
+
+	if(strcmp(val[1],"STABLE")==0){
+		lev->lifetime = 0.;
+		lev->lifetimeUnit = -1;
+	}else{
+		lev->lifetime = atof(val[0]);
+		if(lev->lifetime<=0.){
+			lev->lifetimeUnit = -1;
+		}else if(strcmp(val[1],"Y")==0){
+			lev->lifetimeUnit = 0;
+		}else if(strcmp(val[1],"D")==0){
+			lev->lifetimeUnit = 1;
+		}else if(strcmp(val[1],"H")==0){
+			lev->lifetimeUnit = 2;
+		}else if(strcmp(val[1],"M")==0){
+			lev->lifetimeUnit = 3;
+		}else if(strcmp(val[1],"S")==0){
+			lev->lifetimeUnit = 4;
+		}else if(strcmp(val[1],"MS")==0){
+			lev->lifetimeUnit = 5;
+		}else if(strcmp(val[1],"US")==0){
+			lev->lifetimeUnit = 6;
+		}else if(strcmp(val[1],"NS")==0){
+			lev->lifetimeUnit = 7;
+		}else if(strcmp(val[1],"PS")==0){
+			lev->lifetimeUnit = 8;
+		}else if(strcmp(val[1],"FS")==0){
+			lev->lifetimeUnit = 9;
+		}else if(strcmp(val[1],"AS")==0){
+			lev->lifetimeUnit = 10;
+		}else if(strcmp(val[1],"EV")==0){
+			lev->lifetimeUnit = 11;
+		}else if(strcmp(val[1],"KEV")==0){
+			lev->lifetimeUnit = 12;
+		}else if(strcmp(val[1],"MEV")==0){
+			lev->lifetimeUnit = 13;
+		}else{
+			printf("Unknown lifetime unit: %s (full string: %s)\n",val[1],ltstring);
+		}
+	}
+
+	
+
+}
+
 //parse spin parity values for a given level
 void parseSpinPar(level * lev, char * spstring){
 
@@ -714,6 +791,11 @@ void readENSDFFile(const char * fileName, ndata * nd)
 													memcpy(spbuff, &line[21], 15);
 													spbuff[15] = '\0';
 													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],spbuff);
+													//parse the lifetime imformation
+													char ltbuff[11];
+													memcpy(ltbuff, &line[39], 10);
+													ltbuff[10] = '\0';
+													parseLifetime(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],ltbuff);
 													nd->nuclData[nd->numNucl].numLevels++;
 												}
 											

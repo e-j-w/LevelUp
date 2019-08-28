@@ -40,8 +40,8 @@ typedef struct
 {
   double energy; //level energy in keV
   int energyerr; //energy uncertainty value
-  double lifetime; //level lifetime
-  int lifetimeUnit; //units for level lifetime
+  double lifetime; //level lifetime (-1 if unknown)
+  int lifetimeUnit; //units for level lifetime (-1=stable,0=years,1=days,2=hours,3=minutes,4=s,5=ms,6=us,7=ns,8=ps,9=fs,10=as,11=eV,12=keV,13=MeV)
   int lifetimeErr; //lifetime uncertainty value
   int numspinparvals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
