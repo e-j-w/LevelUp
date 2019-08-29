@@ -40,6 +40,46 @@ int readMCA(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
   
 }
 
+//function reads an .fmca file into a double array and returns the number of spectra read in
+int readFMCA(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
+{
+	int i,j;
+	float tmpHist[S32K];
+	
+	//get the number of spectra in the .fmca file
+  int numSpec=S32K;
+  for (i=0;i<numSpec;i++)
+    if(fread(tmpHist,S32K*sizeof(float),1,inp)!=1)
+      {
+        numSpec=i;
+        break;
+      }
+  fclose(inp);
+  //printf("number of spectra in file '%s': %i\n",filename,numSpec);
+	if((inp=fopen(filename,"r"))==NULL) //reopen the file
+    {
+      printf("ERROR: Cannot open the input file: %s\n",filename);
+      printf("Check that the file exists.\n");
+      exit(-1);
+    }
+
+	for (i=0;i<numSpec;i++)
+		{
+			if(fread(tmpHist,S32K*sizeof(float),1,inp)!=1)
+				{
+					printf("ERROR: Cannot read spectrum %i from the .fmca file: %s\n",i,filename);
+					printf("Verify that the format and number of spectra in the file are correct.\n");
+					exit(-1);
+				}
+			else
+				for(j=0;j<S32K;j++)
+					outHist[i][j]=(double)tmpHist[j];
+		}
+	
+	return numSpec;
+  
+}
+
 //function reads an .spe file into a double array and returns the array
 int readSPE(FILE * inp, const char * filename, double outHist[NSPECT][S32K])
 {
@@ -88,12 +128,14 @@ int readDataFile(const char * filename, double outHist[NSPECT][S32K])
 			const char *dot = strrchr(filename, '.');//get the file extension
 			if(strcmp(dot + 1,"mca")==0)
 				numSpec=readMCA(inp, filename, outHist);
+			else if(strcmp(dot + 1,"fmca")==0)
+				numSpec=readFMCA(inp, filename, outHist);
 			else if(strcmp(dot + 1,"spe")==0)
 				numSpec=readSPE(inp, filename, outHist);
 			else
 				{
 					printf("Improper type of input file: %s\n",filename);
-				  printf("Integer array (.mca) or radware (.spe) files are supported.\n");
+				  printf("Integer array (.mca), float array (.fmca), or radware (.spe) files are supported.\n");
 				  //exit(-1);
 				}
 			fclose(inp);

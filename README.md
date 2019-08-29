@@ -42,6 +42,6 @@ Some functions in this program allow for analysis of gamma-ray spectra.  The pro
 
 **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (up to 100) and the second index denoting a bin number (up to 32768).
 
-**.spe** - An .spe file is the data type written by radware when using the 'ws' command in gf3.
+**.fmca** - An .fmca file has the same format as .mca except it uses floats rather than integers.
 
-
+**.spe** -  Spectrum format used by the RadWare software package (available at: https://radware.phy.ornl.gov/), for example when using the 'ws' command in gf3.

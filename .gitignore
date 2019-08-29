@@ -9,6 +9,7 @@ list
 *tmpdatafile*
 #data file types
 *.mca
+*.fmca
 *.spe
 *.root
 #temporary files from text editors
