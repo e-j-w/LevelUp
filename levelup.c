@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
 											else
 												{
 													//find peak positions (will use looser criteria here than in id)
-													peak_fit_par pfpar = findPeak(sp->sumHist,cntr,3.,50);
+													peak_fit_par pfpar = findPeak(sp->sumHist,cntr,5.,20);
 													//reportPeakPositions(&pfpar);
 													//find matching cascades
 													findCascadeFromGammaEInSpec(&pfpar,nd,ge);
@@ -505,6 +505,10 @@ int main(int argc, char *argv[])
 							}
 							free(nrp);
   						}
+  			}
+  		else if(strTokCmp(cmd,"thereisnohope",0)==0)
+  			{
+  				printf("Did I tell you the story about the man with a watch in a cave?\n");
   			}
   		else if(strcmp(cmd,"")==0)
   			{
