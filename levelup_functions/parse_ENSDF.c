@@ -695,6 +695,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
   char str[256];//string to be read from file (will be tokenized)
   char line[256],val[MAXNUMVALS][256];
   int tokPos;//position when tokenizing
+  int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
   
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
@@ -716,6 +717,7 @@ void readENSDFFile(const char * fileName, ndata * nd)
 					if(isEmpty(str))
 						{
 							subSec++; //empty line, increment which subsection we're on
+							firstQLine = 1;
 						}
 					else
 						{
@@ -829,8 +831,45 @@ void readENSDFFile(const char * fileName, ndata * nd)
 											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas++;
 											  
 										  }
-										  
 					
+					//add Q-values and separation energies
+					if(nd->numNucl>=0) //check that indices are valid
+						if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
+							if(subSec==0)//adopted gamma levels subsection
+								if(strcmp(typebuff," Q")==0)
+									{
+										if(firstQLine==1){
+											//parse the beta Q-value
+											char qbbuff[11];
+											memcpy(qbbuff, &line[9], 10);
+											qbbuff[10] = '\0';
+											
+											nd->nuclData[nd->numNucl].qbeta = atof(qbbuff);
+
+											//parse the neutron sep energy
+											char nsbuff[9];
+											memcpy(nsbuff, &line[21], 8);
+											nsbuff[8] = '\0';
+
+											nd->nuclData[nd->numNucl].sn = atof(nsbuff);
+
+											//parse the proton sep energy
+											char psbuff[9];
+											memcpy(psbuff, &line[31], 8);
+											psbuff[8] = '\0';
+
+											nd->nuclData[nd->numNucl].sp = atof(psbuff);
+
+											//parse the alpha Q-value
+											char qabuff[9];
+											memcpy(qabuff, &line[41], 8);
+											qabuff[8] = '\0';
+											
+											nd->nuclData[nd->numNucl].qalpha = atof(qabuff);
+										}
+										firstQLine = 0;
+									}
+								
 				}
 		}
 	fclose(config);

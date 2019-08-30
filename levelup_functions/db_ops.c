@@ -549,6 +549,8 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 	if((nd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)||(numLevels>=MAXLEVELSPERNUCL))
 		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
+	printf("\nS(n) = %.1f keV, S(p) = %.1f keV, Q(beta) = %.1f keV, Q(alpha) = %.1f keV\n",nd->nuclData[nucl].sn,nd->nuclData[nucl].sp,nd->nuclData[nucl].qbeta,nd->nuclData[nucl].qalpha);
+
 	printf("\n Level Energy  Gamma Energy  Intensity    Final E              Jpi       Lifetime\n        (keV)         (keV)                 (keV)\n\n");
 	if(nucl<MAXNUMNUCL)
 		for(i=0;i<nd->nuclData[nucl].numLevels;i++)

@@ -26,13 +26,34 @@ Right now the program's capabilities are fairly limited, but more will be added 
 * make
 * readline
 
-The current version has been tested under Centos 7.
+The current version has been tested under Centos 7 and Arch Linux as of August 2019.
 
 ### Instructions
 
 Use `make` to compile.  To run the program from anywhere, move the resulting `levelup` executable to any directory under your `PATH` environment variable.
 
 The environment variable `ENSDF` pointing to a directory containing unzipped ENSDF data files must be defined in order for the program to run.  Running the program without this variable defined will display an error message.
+
+## How to Use
+
+The program is run from the command line, a listing of available commands follows:
+
+|**Command**|**Effect**|
+|:---:|:---:|
+| casc NUCL | prints cascade data for the specified nucleus (NUCL is the nucleus name, eg. '68SE')|
+| id SP | finds nuclei with cascades which match peaks in the specified spectrum (SP is the spectrum filename, eg. 'spectrum.mca') |
+| qsp SP | finds nuclei corresponding to a specific gamma ray energy in the specified spectrum, by finding cascades in the spectrum which contain a gamma ray at or near that energy |
+| lev NUCL | prints level data for the specified nucleus (can optionally specify the number of levels to show as a second parameter) |
+| ol NUCL1 NUCL2 | finds overlapping gamma rays in the two specified nuclei |
+| olr NUCL1 NUCL2 | finds overlapping gamma rays in the in the nucleus NUCL1 and nuclei in the region of the nucleus NUCL2 (a search width will be requested) |
+| pfr NUCL | finds gamma rays in the in the region of the nucleus NUCL which match an energy specified by the user |
+| nz NUCL | show N, Z numbers for the specified nucleus |
+| ln | list names of nuclei in the ENSDF database |
+| fc | find nuclei which match a cascade that you enter |
+| rebuild | rebuild the ENSDF database from ENSDF files on disk |
+| help | list commands |
+| exit | exit the program |
+
 
 ## Notes
 

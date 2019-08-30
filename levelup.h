@@ -63,6 +63,8 @@ typedef struct
   char nuclName[10]; //name of the nucleus, eg. '68SE'
   short N; //neutrons in nucleus
   short Z; //protons in nucleus
+  float qbeta, qalpha;
+  float sp, sn; //proton and neutron separation energies
   short numLevels; //number of excited levels in this nucleus
   level levels[MAXLEVELSPERNUCL]; //levels belonging to the nucleus
   short numCascades; //number of cascades stored for this nucleus
