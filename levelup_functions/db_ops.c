@@ -1,7 +1,7 @@
 #include "db_ops.h"
 
-int nameToNuclIndex(const char * name, ndata *nd)
-{
+int nameToNuclIndex(const char * name, ndata *nd){
+
 	int i;
 	for(i=0;i<nd->numNucl;i++)
 		if(strcmp(nd->nuclData[i].nuclName,name)==0)
@@ -10,8 +10,8 @@ int nameToNuclIndex(const char * name, ndata *nd)
 	return -1;//negative value indicates failure
 }
 
-int NZToNuclIndex(int N, int Z, ndata *nd)
-{
+int NZToNuclIndex(int N, int Z, ndata *nd){
+
 	int i;
 	for(i=0;i<nd->numNucl;i++)
 		if(nd->nuclData[i].N==N)
@@ -21,8 +21,8 @@ int NZToNuclIndex(int N, int Z, ndata *nd)
 	return -1;//negative value indicates failure
 }
 
-int isNuclRadioactive(int nucl, ndata *nd)
-{
+int isNuclRadioactive(int nucl, ndata *nd){
+
 	int i;
 	for(i=0;i<nd->nuclData[nucl].numLevels;i++){
 		if(nd->nuclData[nucl].levels[i].energy <= 0.0){
@@ -47,8 +47,8 @@ int isNuclRadioactive(int nucl, ndata *nd)
 //6=on neutron AND proton subshell closure
 //7=on neutron shell AND proton subshell closure
 //8=on neutron subshell AND proton shell closure
-int isNuclOnShellClosure(int nucl, ndata *nd)
-{
+int isNuclOnShellClosure(int nucl, ndata *nd){
+
 	int protonShell=0;
 	int neutronShell=0;
 
@@ -151,8 +151,8 @@ void rankNuclides(nuclide_rank_par * nrp, ndata *nd){
 	free(nri);
 }
 
-void showCascadeData(int nucl, ndata *nd)
-{
+void showCascadeData(int nucl, ndata *nd){
+
 	//dump cascade data
 	int m,n;
 
@@ -181,8 +181,7 @@ void showCascadeData(int nucl, ndata *nd)
 }
 
 //function to find cascade(s) which match the input cascade
-void findCascade(gamma_cascade * c, int numToMatch, ndata *nd)
-{
+void findCascade(gamma_cascade * c, int numToMatch, ndata *nd){
 
 	int i,j,k,l,numMatching,numMatched;
 	
@@ -216,8 +215,8 @@ void findCascade(gamma_cascade * c, int numToMatch, ndata *nd)
 }
 
 //function to find cascade(s) which match the input peak parameters
-void findCascadesFromFit(peak_fit_par * par, casc_match_par * cpar, ndata *nd)
-{
+void findCascadesFromFit(peak_fit_par * par, casc_match_par * cpar, ndata *nd){
+
 	int i,j,k,l;
 	
 	for(i=0;i<nd->numNucl;i++)
@@ -239,8 +238,8 @@ void findCascadesFromFit(peak_fit_par * par, casc_match_par * cpar, ndata *nd)
 			}
 }
 
-void findCascadeInSpec(peak_fit_par * par, ndata *nd)
-{
+void findCascadeInSpec(peak_fit_par * par, ndata *nd){
+
 	int i,j,k,l;
 	int *cascFoundForNucl=(int*)calloc(MAXNUMNUCL,sizeof(int));//initialize to 0 using calloc
 	int maxCascSize=par->numPeaksFound;
@@ -285,8 +284,8 @@ void findCascadeInSpec(peak_fit_par * par, ndata *nd)
 	free(cpar);
 }
 
-void findCascadeFromGammaEInSpec(peak_fit_par * par, ndata *nd, double ge)
-{
+void findCascadeFromGammaEInSpec(peak_fit_par * par, ndata *nd, double ge){
+
 	int i,j,k,l,m;
 	int *cascFoundForNucl=(int*)calloc(MAXNUMNUCL,sizeof(int));//initialize to 0 using calloc
 	int maxCascSize=par->numPeaksFound;
@@ -338,8 +337,8 @@ void findCascadeFromGammaEInSpec(peak_fit_par * par, ndata *nd, double ge)
 
 
 
-void findOverlappingLevels(int nucl1, int nucl2, ndata *nd)
-{
+void findOverlappingLevels(int nucl1, int nucl2, ndata *nd){
+
 	int i,j,k,l;
 	int overlapFound=0;
 	int nearbyFound=0;
@@ -348,20 +347,20 @@ void findOverlappingLevels(int nucl1, int nucl2, ndata *nd)
 	for(i=0;i<nd->nuclData[nucl1].numLevels;i++)
 		for(j=0;j<nd->nuclData[nucl2].numLevels;j++)
 			for(k=0;k<nd->nuclData[nucl1].levels[i].numGammas;k++)
-				for(l=0;l<nd->nuclData[nucl1].levels[j].numGammas;l++)
+				for(l=0;l<nd->nuclData[nucl2].levels[j].numGammas;l++)
 					{
 						if(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
 							{
 								printf("Overlap at energies: %11.1f keV (%s lv#%2i, ",nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
 								if(nd->nuclData[nucl1].levels[i].gamma_intensities[k]>0)
-									printf("I=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
+									printf("Intensity=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
 								else
-									printf("I=unwn");
+									printf("Intensity=unwn");
 								printf("), %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl2].levels[j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
 								if(nd->nuclData[nucl2].levels[j].gamma_intensities[l]>0)
-									printf("I=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
+									printf("Intensity=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
 								else
-									printf("I=unwn)\n");
+									printf("Intensity=unwn)\n");
 								overlapFound++;
 							}
 					}
@@ -369,21 +368,21 @@ void findOverlappingLevels(int nucl1, int nucl2, ndata *nd)
 	for(i=0;i<nd->nuclData[nucl1].numLevels;i++)
 		for(j=0;j<nd->nuclData[nucl2].numLevels;j++)
 			for(k=0;k<nd->nuclData[nucl1].levels[i].numGammas;k++)
-				for(l=0;l<nd->nuclData[nucl1].levels[j].numGammas;l++)
+				for(l=0;l<nd->nuclData[nucl2].levels[j].numGammas;l++)
 					{
 						if(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
 							if(!(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],2.0)))
 								{					
 									printf("Nearby peaks at energies: %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
 									if(nd->nuclData[nucl1].levels[i].gamma_intensities[k]>0)
-										printf("I=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
+										printf("Intensity=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
 									else
-										printf("I=unwn");
+										printf("Intensity=unwn");
 									printf("), %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl2].levels[j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
 									if(nd->nuclData[nucl2].levels[j].gamma_intensities[l]>0)
-										printf("I=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
+										printf("Intensity=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
 									else
-										printf("I=unwn)\n");
+										printf("Intensity=unwn)\n");
 									nearbyFound++;
 								}
 					}
@@ -398,8 +397,8 @@ void findOverlappingLevels(int nucl1, int nucl2, ndata *nd)
 
 //finds levels of nucleus 1 which overlaps with levels of nuclei in the
 //region of nucleus 2 (N,Z +/- searchDim)
-void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, ndata *nd)
-{
+void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, ndata *nd){
+
 	int i,j,n2ind;
 	
 	for(i=nd->nuclData[nucl2].N-searchDim;i<=nd->nuclData[nucl2].N+searchDim;i++)
@@ -415,8 +414,8 @@ void findOverlappingLevelsInRegion(int nucl1, int nucl2, int searchDim, ndata *n
 
 //finds levels matching the specified energy in the region of the specified nucleus
 //(region size is N,Z +/- searchDim)
-void findLevelInRegion(double energy, int nucl, int searchDim, ndata *nd)
-{
+void findLevelInRegion(double energy, int nucl, int searchDim, ndata *nd){
+
 	int i,j,k,l,nind;
 	
 	for(i=nd->nuclData[nucl].N-searchDim;i<=nd->nuclData[nucl].N+searchDim;i++)
@@ -497,7 +496,7 @@ void fillLifetime(level *gl, char *ltstr){
 			}else if(gl->lifetimeUnit == 2){
 				strcat(ltstr,"hours");
 			}else if(gl->lifetimeUnit == 3){
-				strcat(ltstr,"minutes");
+				strcat(ltstr,"min");
 			}else if(gl->lifetimeUnit == 4){
 				strcat(ltstr,"s");
 			}else if(gl->lifetimeUnit == 5){
@@ -528,8 +527,8 @@ void fillLifetime(level *gl, char *ltstr){
 
 //shows a table of levels
 //numLevels is the number of levels to show (0 -> show all levels)
-void showLevelData(int nucl, ndata *nd, int numLevels)
-{
+void showLevelData(int nucl, ndata *nd, int numLevels){
+
 	int i,j;
 	double finalEnergy;
 	char spstr[256],ltstr[256];
@@ -586,46 +585,44 @@ void showLevelData(int nucl, ndata *nd, int numLevels)
 				}
 }
 
-void showNZ(int nucl, ndata *nd)
-{
+void showNZ(int nucl, ndata *nd){
+
 	char scstr[256];
 	fillShellClosure(nucl,nd,scstr);
 	printf("For nucleus %s: N = %i, Z = %i\n",nd->nuclData[nucl].nuclName,nd->nuclData[nucl].N,nd->nuclData[nucl].Z);
 	printf("This nucleus is %s.\n",scstr);
 }
 
-void showNuclNames(ndata *nd)
-{
+void showNuclNames(ndata *nd){
+
 	int i;
 	printf("Known nuclei: %s",nd->nuclData[0].nuclName);
-	for(i=1;i<nd->numNucl;i++)
-		{
-			printf(", %s",nd->nuclData[i].nuclName);
-		}
+	for(i=1;i<nd->numNucl;i++){
+		printf(", %s",nd->nuclData[i].nuclName);
+	}
 	printf("\n");
 }
 
-void rebuildDatabase(ndata *nd, FILE *db)
-{
+void rebuildDatabase(ndata *nd, FILE *db){
+
 	int i;
 	char fileName[256],str[8];
 	
 	initialize_database(nd);
 	
-	for(i=1;i<350;i++)
-		{
-			strcpy(fileName,"");
-			strcat(fileName,getenv("ENSDF"));
-			if(i<10)
-				strcat(fileName,"ensdf.00");
-			else if(i<100)
-				strcat(fileName,"ensdf.0");
-			else
-				strcat(fileName,"ensdf.");
-			sprintf(str,"%i",i);
-			strcat(fileName,str);
-			readENSDFFile(fileName,nd); //grab data from the ENSDF file (see parse_ENSDF.c)
-		}
+	for(i=1;i<350;i++){
+		strcpy(fileName,"");
+		strcat(fileName,getenv("ENSDF"));
+		if(i<10)
+			strcat(fileName,"ensdf.00");
+		else if(i<100)
+			strcat(fileName,"ensdf.0");
+		else
+			strcat(fileName,"ensdf.");
+		sprintf(str,"%i",i);
+		strcat(fileName,str);
+		readENSDFFile(fileName,nd); //grab data from the ENSDF file (see parse_ENSDF.c)
+	}
 	printf("Data imported for %i nuclei.\n",nd->numNucl);
 	printf("Generating cascade data.\n");
 	generateCascadeData(nd);

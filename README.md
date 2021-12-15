@@ -6,7 +6,7 @@ Maintainer: Jonathan Williams
 
 An offline viewer of ENSDF data, with extensions for analyzing gamma-ray spectra.
 
-The program parses plaintext ENSDF data files (available at: https://www-nds.iaea.org/ensdf_base_files/) into a binary database, which can then be queried for information on various nuclei (levels, cascades, gamma-rays).
+The program parses plaintext ENSDF data files (available [here](https://www.nndc.bnl.gov/ensarchivals/)) into a binary database, which can then be queried for information on various nuclei (levels, cascades, gamma-rays).
 
 ## Features
 
