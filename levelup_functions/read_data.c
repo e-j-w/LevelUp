@@ -174,25 +174,23 @@ int readNuclideRankParameters(const char * filename, nuclide_rank_par * nrpar)
 								if(tok!=NULL){
 									tok[strcspn(tok, "\r\n")] = 0;//strips newline characters from the string
 									strcpy(value,tok);
-									if((parameter!=NULL)&&(value!=NULL)){
-										if(strcmp(parameter,"on_shell_closure")==0){
-											nrpar->onShellClosure = atof(value);
-										}else if(strcmp(parameter,"on_subshell_closure")==0){
-											nrpar->onSubshellClosure = atof(value);
-										}else if(strcmp(parameter,"radioactive")==0){
-											nrpar->radioactive = atof(value);
-										}else if(strcmp(parameter,"low_relative_level_density")==0){
-											nrpar->lowRelativeLevelDensity = atof(value);
-										}else if(strcmp(parameter,"high_relative_level_density")==0){
-											nrpar->highRelativeLevelDensity = atof(value);
-										}else if(strcmp(parameter,"max_distance_from_stability")==0){
-											nrpar->maxDistFromStability = atoi(value);
-										}else if(strcmp(parameter,"exclude_stable_nuclides")==0){
-											if(strcmp(value,"yes")==0){
-												nrpar->excludeStable = 1;
-											}else{
-												nrpar->excludeStable = 0;
-											}
+									if(strcmp(parameter,"on_shell_closure")==0){
+										nrpar->onShellClosure = atof(value);
+									}else if(strcmp(parameter,"on_subshell_closure")==0){
+										nrpar->onSubshellClosure = atof(value);
+									}else if(strcmp(parameter,"radioactive")==0){
+										nrpar->radioactive = atof(value);
+									}else if(strcmp(parameter,"low_relative_level_density")==0){
+										nrpar->lowRelativeLevelDensity = atof(value);
+									}else if(strcmp(parameter,"high_relative_level_density")==0){
+										nrpar->highRelativeLevelDensity = atof(value);
+									}else if(strcmp(parameter,"max_distance_from_stability")==0){
+										nrpar->maxDistFromStability = atoi(value);
+									}else if(strcmp(parameter,"exclude_stable_nuclides")==0){
+										if(strcmp(value,"yes")==0){
+											nrpar->excludeStable = 1;
+										}else{
+											nrpar->excludeStable = 0;
 										}
 									}
 								}
