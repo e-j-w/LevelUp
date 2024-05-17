@@ -68,15 +68,14 @@ void generateCascadeData(ndata *nd)
 	  		nd->nuclData[i].numCascades=0;//initialize properly
 				if(nd->nuclData[i].numLevels>=0) //check that indices are valid
 					for(j=0;j<nd->nuclData[i].numLevels;j++)
-					  for(k=0;k<nd->nuclData[i].levels[j].numGammas;k++)
-					  	{
-					  		//check whether the level decays to another level
-					  		double trialLevelE = nd->nuclData[i].levels[j].energy - nd->nuclData[i].levels[j].gamma_energies[k];
+					  for(k=0;k<nd->levels[nd->nuclData[i].firstLevel + j].numGammas;k++){
+							//check whether the level decays to another level
+							double trialLevelE = nd->levels[nd->nuclData[i].firstLevel + j].energy - nd->levels[nd->nuclData[i].firstLevel + j].gamma_energies[k];
 							for(l=0;l<j;l++)
-								if(fudgeNumbers(trialLevelE, nd->nuclData[i].levels[l].energy, 2.)==1)
+								if(fudgeNumbers(trialLevelE, nd->levels[nd->nuclData[i].firstLevel + l].energy, 2.)==1)
 									{
 										
-										//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->nuclData[i].levels[j].energy,nd->nuclData[i].levels[l].energy);
+										//printf("-->%s: Cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->levels[nd->nuclData[i].firstLevel + j].energy,nd->levels[nd->nuclData[i].firstLevel + l].energy);
 										//printf("Number of cascades: %i\n",nd->nuclData[i].numCascades);
 											
 										append=0;
@@ -84,12 +83,12 @@ void generateCascadeData(ndata *nd)
 										for(m=0;m<nd->nuclData[i].numCascades;m++)
 									  	if(m<MAXCASCDESPERNUCL)
 									  		if(nd->nuclData[i].cascades[m].numLevels<MAXGAMMASPERLEVEL)
-													if(lastLevelInCascade(&nd->nuclData[i].cascades[m], nd->nuclData[i].levels[l].energy))
+													if(lastLevelInCascade(&nd->nuclData[i].cascades[m], nd->levels[nd->nuclData[i].firstLevel + l].energy))
 														if(nd->nuclData[i].cascades[m].numLevels+1<=MAXCASCDELENGTH)
 													  	{
 													  		//printf("Adding to cascade %i.\n",m+1);
 													  		//add level to existing cascade
-													  		nd->nuclData[i].cascades[m].energies[nd->nuclData[i].cascades[m].numLevels] = nd->nuclData[i].levels[j].energy;
+													  		nd->nuclData[i].cascades[m].energies[nd->nuclData[i].cascades[m].numLevels] = nd->levels[nd->nuclData[i].firstLevel + j].energy;
 													  		nd->nuclData[i].cascades[m].numLevels++;
 													  		append=1;
 													  	}
@@ -99,7 +98,7 @@ void generateCascadeData(ndata *nd)
 												if((nd->nuclData[i].numCascades+1)<=MAXCASCDESPERNUCL)//verify that there is room for a new cascade
 													for(m=0;m<nd->nuclData[i].numCascades;m++)
 														{
-															ind=levelInCascade(&nd->nuclData[i].cascades[m], nd->nuclData[i].levels[l].energy);
+															ind=levelInCascade(&nd->nuclData[i].cascades[m], nd->levels[nd->nuclData[i].firstLevel + l].energy);
 							        				if(ind>=0)
 							        					{
 							        						//printf("Copying existing data from cascade %i.  ind=%i\n",m+1,ind);
@@ -111,7 +110,7 @@ void generateCascadeData(ndata *nd)
 																			for(n=0;n<=ind;n++)
 																				nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[n]=nd->nuclData[i].cascades[m].energies[n];
 																			//add the new level
-																			nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[ind+1]=nd->nuclData[i].levels[j].energy;
+																			nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[ind+1]=nd->levels[nd->nuclData[i].firstLevel + j].energy;
 																			//increment cascade counter
 																			nd->nuclData[i].numCascades++;
 																			break;
@@ -126,8 +125,8 @@ void generateCascadeData(ndata *nd)
 													{
 														//printf("Creating new cascade.\n");
 														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].numLevels=2;
-														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[0]=nd->nuclData[i].levels[l].energy;
-														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[1]=nd->nuclData[i].levels[j].energy;
+														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[0]=nd->levels[nd->nuclData[i].firstLevel + l].energy;
+														nd->nuclData[i].cascades[nd->nuclData[i].numCascades].energies[1]=nd->levels[nd->nuclData[i].firstLevel + j].energy;
 														nd->nuclData[i].numCascades++;
 													}
 											}
@@ -138,10 +137,10 @@ void generateCascadeData(ndata *nd)
 						      		if(strcmp(nd->nuclData[i].nuclName,"68SE")==0)
 						      			{
 										  		printf("j=%i, k=%i, l=%i, numLevels=%i\n",j,k,l,nd->nuclData[i].numLevels);
-										  		printf("-->%s: No cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->nuclData[i].levels[j].energy,nd->nuclData[i].levels[l].energy);
+										  		printf("-->%s: No cascade detected between levels at energies %f and %f keV.\n",nd->nuclData[i].nuclName,nd->levels[nd->nuclData[i].firstLevel + j].energy,nd->levels[nd->nuclData[i].firstLevel + l].energy);
 						      			}
 						      	}*/
-						    }
+						}
 						    
 				//dump cascade data
 				/*if(nd->nuclData[i].numCascades>0)
@@ -672,10 +671,10 @@ void initialize_database(ndata * nd)
 	memset(nd,0,sizeof(ndata));
 	
 	nd->numNucl = -1;
-	for(i=0;i<MAXNUMNUCL;i++)
-		{
-			nd->nuclData[i].numLevels = 0;
-		}
+	nd->numLvls = 0;
+	for(i=0;i<MAXNUMNUCL;i++){
+		nd->nuclData[i].numLevels = 0;
+	}
 }
 
 //checks whether a string is all whitespace and returns 1 if true
@@ -701,182 +700,170 @@ void readENSDFFile(const char * fileName, ndata * nd){
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
   //associated with a particlular reaction mechanism
-  int subSec=0; 
+  int subSec=0;
   
   //open the file and read all parameters
-  if((config=fopen(fileName,"r"))==NULL)
-    {
-      //printf("WARNING: Cannot open the ENSDF file %s\n",fileName);
-      return;
-    }
-  while(!(feof(config)))//go until the end of file is reached
-    {
-			if(fgets(str,256,config)!=NULL) //get an entire line
+  if((config=fopen(fileName,"r"))==NULL){
+		//printf("WARNING: Cannot open the ENSDF file %s\n",fileName);
+		return;
+	}
+  while(!(feof(config))){ //go until the end of file is reached
+
+		if(fgets(str,256,config)!=NULL){ //get an entire line
+
+			strcpy(line,str); //store the entire line
+			//printf("%s\n",line);
+			if(isEmpty(str)){
+				subSec++; //empty line, increment which subsection we're on
+				firstQLine = 1;
+			}else{
+				tok=strtok (str," ");
+				tokPos=0;
+				strcpy(val[tokPos],tok);
+				while (tok != NULL)
 				{
-					strcpy(line,str); //store the entire line
-					//printf("%s\n",line);
-					if(isEmpty(str))
-						{
-							subSec++; //empty line, increment which subsection we're on
-							firstQLine = 1;
-						}
-					else
-						{
-							tok=strtok (str," ");
-							tokPos=0;
+					tok = strtok (NULL, " ");
+					if(tok!=NULL){
+						tokPos++;
+						if(tokPos<MAXNUMVALS)
 							strcpy(val[tokPos],tok);
-							while (tok != NULL)
-							{
-								tok = strtok (NULL, " ");
-								if(tok!=NULL)
-									{
-										tokPos++;
-										if(tokPos<MAXNUMVALS)
-											strcpy(val[tokPos],tok);
-										else
-											break;
-									}
-							}
+						else
+							break;
 					}
-					
-					//increment the nucleus if a new nucleus is found
-					char hbuff[15];
-					memcpy(hbuff, &line[9], 14);
-					hbuff[14] = '\0';
-					if(strcmp(hbuff,"ADOPTED LEVELS")==0)
-						if(nd->numNucl<MAXNUMNUCL){
-							nd->numNucl++;
-							subSec=0; //we're at the beginning of the entry for this nucleus 
-							//printf("Adding gamma data for nucleus %s\n",val[0]);
-							strncpy(nd->nuclData[nd->numNucl].nuclName,val[0],10);
-							getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
-						}
-					/*//parse the nucleus name
-					char nbuff[7];
-					memcpy(nbuff, &line[0], 6);
-					nbuff[6] = '\0';*/
-
-					//parse the line type
-					char typebuff[3];
-					memcpy(typebuff, &line[6], 2);
-					typebuff[2] = '\0';
-
-					//parse the energy
-					char ebuff[10];
-					memcpy(ebuff, &line[9], 9);
-					ebuff[9] = '\0';
-
-					//add gamma levels
-					if(nd->numNucl>=0) //check that indices are valid
-						if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
-							if(subSec==0)//adopted gamma levels subsection
-								if(nd->nuclData[nd->numNucl].numLevels<MAXLEVELSPERNUCL)
-									if(strcmp(typebuff," L")==0)
-										{
-											
-											
-											double levelE = atof(ebuff);
-											//printf("Found gamma level at %f keV.\n",atof(ebuff));
-											//parse the energy error
-											char eebuff[3];
-											memcpy(eebuff, &line[19], 2);
-											eebuff[2] = '\0';
-											int levelEerr = atoi(eebuff);
-
-											if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].energy))
-												{
-													//the level energy represents a new level
-													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energy=levelE;
-													nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energyerr=levelEerr;
-													//parse the level spin and parity
-													char spbuff[16];
-													memcpy(spbuff, &line[21], 15);
-													spbuff[15] = '\0';
-													parseSpinPar(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],spbuff);
-													//parse the lifetime imformation
-													char ltbuff[11];
-													memcpy(ltbuff, &line[39], 10);
-													ltbuff[10] = '\0';
-													parseLifetime(&nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels],ltbuff);
-													nd->nuclData[nd->numNucl].numLevels++;
-												}
-											
-											
-											
-											//add gamma to cascade if neccessary
-											/*for(i=0;i<nd->nuclData[nd->numNucl].numLevels-1;i++)
-											  {
-											    //check whether the level decays to another level
-											    if(fudgeNumbers(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels].energy, nd->nuclData[nd->numNucl].levels[i].energy)==1)
-											  }*/
-										}
-					
-					//add gamma rays
-					if(nd->numNucl>=0) //check that indices are valid
-					  if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
-						  if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
-							  if(subSec==0)//adopted gamma levels subsection
-								  if(nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas<MAXGAMMASPERLEVEL)
-									  if(strcmp(typebuff," G")==0)
-										  {
-											//parse the gamma intensity
-											char ibuff[8];
-											memcpy(ibuff, &line[21], 7);
-											ibuff[7] = '\0';
-										    
-										    nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].gamma_energies[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas]=atof(ebuff);
-										    //printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
-											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].gamma_intensities[nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas]=atof(ibuff);
-											nd->nuclData[nd->numNucl].levels[nd->nuclData[nd->numNucl].numLevels-1].numGammas++;
-											  
-										  }
-					
-					//add Q-values and separation energies
-					if(nd->numNucl>=0) //check that indices are valid
-						if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
-							if(subSec==0)//adopted gamma levels subsection
-								if(strcmp(typebuff," Q")==0)
-									{
-										if(firstQLine==1){
-											//parse the beta Q-value
-											char qbbuff[11];
-											memcpy(qbbuff, &line[9], 10);
-											qbbuff[10] = '\0';
-											
-											nd->nuclData[nd->numNucl].qbeta = atof(qbbuff);
-
-											//parse the neutron sep energy
-											char nsbuff[9];
-											memcpy(nsbuff, &line[21], 8);
-											nsbuff[8] = '\0';
-
-											nd->nuclData[nd->numNucl].sn = atof(nsbuff);
-
-											//parse the proton sep energy
-											char psbuff[9];
-											memcpy(psbuff, &line[31], 8);
-											psbuff[8] = '\0';
-
-											nd->nuclData[nd->numNucl].sp = atof(psbuff);
-
-											//parse the alpha Q-value
-											char qabuff[9];
-											memcpy(qabuff, &line[41], 8);
-											qabuff[8] = '\0';
-											
-											nd->nuclData[nd->numNucl].qalpha = atof(qabuff);
-										}
-										firstQLine = 0;
-									}
-								
 				}
+			}
+			
+			//increment the nucleus if a new nucleus is found
+			char hbuff[15];
+			memcpy(hbuff, &line[9], 14);
+			hbuff[14] = '\0';
+			if(strcmp(hbuff,"ADOPTED LEVELS")==0){
+				if(nd->numNucl<MAXNUMNUCL){
+					nd->numNucl++;
+					subSec=0; //we're at the beginning of the entry for this nucleus 
+					//printf("Adding gamma data for nucleus %s\n",val[0]);
+					strncpy(nd->nuclData[nd->numNucl].nuclName,val[0],10);
+					getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
+				}
+			}
+			/*//parse the nucleus name
+			char nbuff[7];
+			memcpy(nbuff, &line[0], 6);
+			nbuff[6] = '\0';*/
+
+			//parse the line type
+			char typebuff[3];
+			memcpy(typebuff, &line[6], 2);
+			typebuff[2] = '\0';
+
+			//parse the energy
+			char ebuff[10];
+			memcpy(ebuff, &line[9], 9);
+			ebuff[9] = '\0';
+
+			//add gamma levels
+			if(nd->numNucl>=0){ //check that indices are valid
+				if(strncmp(val[0],nd->nuclData[nd->numNucl].nuclName,10)==0){
+					if(subSec==0){ //adopted gamma levels subsection
+						if(nd->numLvls<MAXNUMLVLS){
+							if(strcmp(typebuff," L")==0){
+
+								double levelE = atof(ebuff);
+								//printf("Found gamma level at %f keV.\n",atof(ebuff));
+								//parse the energy error
+								char eebuff[3];
+								memcpy(eebuff, &line[19], 2);
+								eebuff[2] = '\0';
+								int levelEerr = atoi(eebuff);
+								if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy))){
+									//the level energy represents a new level
+									if(nd->nuclData[nd->numNucl].numLevels == 0){
+										nd->nuclData[nd->numNucl].firstLevel = nd->numLvls;
+									}
+									nd->levels[nd->numLvls].energy=levelE;
+									nd->levels[nd->numLvls].energyerr=levelEerr;
+									//parse the level spin and parity
+									char spbuff[16];
+									memcpy(spbuff, &line[21], 15);
+									spbuff[15] = '\0';
+									parseSpinPar(&nd->levels[nd->numLvls],spbuff);
+									//parse the lifetime imformation
+									char ltbuff[11];
+									memcpy(ltbuff, &line[39], 10);
+									ltbuff[10] = '\0';
+									parseLifetime(&nd->levels[nd->numLvls],ltbuff);
+									nd->nuclData[nd->numNucl].numLevels++;
+									nd->numLvls++;
+								}
+							}
+						}
+					}
+				}
+			}
+			//add gamma rays
+			if(nd->numNucl>=0) //check that indices are valid
+				if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
+					if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
+						if(subSec==0)//adopted gamma levels subsection
+							if(nd->levels[nd->numLvls-1].numGammas<MAXGAMMASPERLEVEL)
+								if(strcmp(typebuff," G")==0){
+									//parse the gamma intensity
+									char ibuff[8];
+									memcpy(ibuff, &line[21], 7);
+									ibuff[7] = '\0';
+										
+									nd->levels[nd->numLvls-1].gamma_energies[nd->levels[nd->numLvls-1].numGammas]=atof(ebuff);
+									//printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
+									nd->levels[nd->numLvls-1].gamma_intensities[nd->levels[nd->numLvls-1].numGammas]=atof(ibuff);
+									nd->levels[nd->numLvls-1].numGammas++;
+										
+								}
+			//add Q-values and separation energies
+			if(nd->numNucl>=0){ //check that indices are valid
+				if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
+					if(subSec==0)//adopted gamma levels subsection
+						if(strcmp(typebuff," Q")==0){
+							if(firstQLine==1){
+								//parse the beta Q-value
+								char qbbuff[11];
+								memcpy(qbbuff, &line[9], 10);
+								qbbuff[10] = '\0';
+								
+								nd->nuclData[nd->numNucl].qbeta = atof(qbbuff);
+
+								//parse the neutron sep energy
+								char nsbuff[9];
+								memcpy(nsbuff, &line[21], 8);
+								nsbuff[8] = '\0';
+
+								nd->nuclData[nd->numNucl].sn = atof(nsbuff);
+
+								//parse the proton sep energy
+								char psbuff[9];
+								memcpy(psbuff, &line[31], 8);
+								psbuff[8] = '\0';
+
+								nd->nuclData[nd->numNucl].sp = atof(psbuff);
+
+								//parse the alpha Q-value
+								char qabuff[9];
+								memcpy(qabuff, &line[41], 8);
+								qabuff[8] = '\0';
+								
+								nd->nuclData[nd->numNucl].qalpha = atof(qabuff);
+							}
+							firstQLine = 0;
+						}
+			}
+
 		}
+	}
 	fclose(config);
-	if(nd->numNucl>=MAXNUMNUCL)
-		{
-			printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
-			exit(-1);
-		}
+	
+	if(nd->numNucl>=MAXNUMNUCL){
+		printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
+		exit(-1);
+	}
 	
 	printf("Finished reading ENSDF file: %s\n",fileName);
   

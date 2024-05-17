@@ -25,8 +25,8 @@ int isNuclRadioactive(int nucl, ndata *nd){
 
 	int i;
 	for(i=0;i<nd->nuclData[nucl].numLevels;i++){
-		if(nd->nuclData[nucl].levels[i].energy <= 0.0){
-			if(nd->nuclData[nucl].levels[i].lifetimeUnit == -1){
+		if(nd->levels[nd->nuclData[nucl].firstLevel + i].energy <= 0.0){
+			if(nd->levels[nd->nuclData[nucl].firstLevel + i].lifetimeUnit == -1){
 				return 0;
 			}else{
 				return 1;
@@ -346,19 +346,19 @@ void findOverlappingLevels(int nucl1, int nucl2, ndata *nd){
 	printf("\n");
 	for(i=0;i<nd->nuclData[nucl1].numLevels;i++)
 		for(j=0;j<nd->nuclData[nucl2].numLevels;j++)
-			for(k=0;k<nd->nuclData[nucl1].levels[i].numGammas;k++)
-				for(l=0;l<nd->nuclData[nucl2].levels[j].numGammas;l++)
+			for(k=0;k<nd->levels[nd->nuclData[nucl1].firstLevel + i].numGammas;k++)
+				for(l=0;l<nd->levels[nd->nuclData[nucl2].firstLevel + j].numGammas;l++)
 					{
-						if(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],2.0))
+						if(fudgeNumbers(nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_energies[k],nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_energies[l],2.0))
 							{
-								printf("Overlap at energies: %11.1f keV (%s lv#%2i, ",nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
-								if(nd->nuclData[nucl1].levels[i].gamma_intensities[k]>0)
-									printf("Intensity=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
+								printf("Overlap at energies: %11.1f keV (%s lv#%2i, ",nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
+								if(nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_intensities[k]>0)
+									printf("Intensity=%4.0f",nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_intensities[k]);
 								else
 									printf("Intensity=unwn");
-								printf("), %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl2].levels[j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
-								if(nd->nuclData[nucl2].levels[j].gamma_intensities[l]>0)
-									printf("Intensity=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
+								printf("), %6.1f keV (%s lv#%2i, ",nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
+								if(nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_intensities[l]>0)
+									printf("Intensity=%4.0f)\n",nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_intensities[l]);
 								else
 									printf("Intensity=unwn)\n");
 								overlapFound++;
@@ -367,20 +367,20 @@ void findOverlappingLevels(int nucl1, int nucl2, ndata *nd){
 	printf("\n");
 	for(i=0;i<nd->nuclData[nucl1].numLevels;i++)
 		for(j=0;j<nd->nuclData[nucl2].numLevels;j++)
-			for(k=0;k<nd->nuclData[nucl1].levels[i].numGammas;k++)
-				for(l=0;l<nd->nuclData[nucl2].levels[j].numGammas;l++)
+			for(k=0;k<nd->levels[nd->nuclData[nucl1].firstLevel + i].numGammas;k++)
+				for(l=0;l<nd->levels[nd->nuclData[nucl2].firstLevel + j].numGammas;l++)
 					{
-						if(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],10.0))
-							if(!(fudgeNumbers(nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl2].levels[j].gamma_energies[l],2.0)))
+						if(fudgeNumbers(nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_energies[k],nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_energies[l],10.0))
+							if(!(fudgeNumbers(nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_energies[k],nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_energies[l],2.0)))
 								{					
-									printf("Nearby peaks at energies: %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl1].levels[i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
-									if(nd->nuclData[nucl1].levels[i].gamma_intensities[k]>0)
-										printf("Intensity=%4.0f",nd->nuclData[nucl1].levels[i].gamma_intensities[k]);
+									printf("Nearby peaks at energies: %6.1f keV (%s lv#%2i, ",nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_energies[k],nd->nuclData[nucl1].nuclName,i+1);
+									if(nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_intensities[k]>0)
+										printf("Intensity=%4.0f",nd->levels[nd->nuclData[nucl1].firstLevel + i].gamma_intensities[k]);
 									else
 										printf("Intensity=unwn");
-									printf("), %6.1f keV (%s lv#%2i, ",nd->nuclData[nucl2].levels[j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
-									if(nd->nuclData[nucl2].levels[j].gamma_intensities[l]>0)
-										printf("Intensity=%4.0f)\n",nd->nuclData[nucl2].levels[j].gamma_intensities[l]);
+									printf("), %6.1f keV (%s lv#%2i, ",nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_energies[l],nd->nuclData[nucl2].nuclName,j+1);
+									if(nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_intensities[l]>0)
+										printf("Intensity=%4.0f)\n",nd->levels[nd->nuclData[nucl2].firstLevel + j].gamma_intensities[l]);
 									else
 										printf("Intensity=unwn)\n");
 									nearbyFound++;
@@ -424,9 +424,9 @@ void findLevelInRegion(double energy, int nucl, int searchDim, ndata *nd){
 				nind=NZToNuclIndex(i,j,nd);
 				if(nind>=0)
 					for(k=0;k<nd->nuclData[nind].numLevels;k++)
-						for(l=0;l<nd->nuclData[nind].levels[k].numGammas;l++)
-							if(fudgeNumbers(nd->nuclData[nind].levels[k].gamma_energies[l],energy,2.0))
-								printf("%s: contains matching gamma with energy %6.1f keV (lv#%2i).\n",nd->nuclData[nind].nuclName,nd->nuclData[nind].levels[k].gamma_energies[l],k+1);
+						for(l=0;l<nd->levels[nd->nuclData[nind].firstLevel + k].numGammas;l++)
+							if(fudgeNumbers(nd->levels[nd->nuclData[nind].firstLevel + k].gamma_energies[l],energy,2.0))
+								printf("%s: contains matching gamma with energy %6.1f keV (lv#%2i).\n",nd->nuclData[nind].nuclName,nd->levels[nd->nuclData[nind].firstLevel + k].gamma_energies[l],k+1);
 			}
 	printf("\n");
 	for(i=nd->nuclData[nucl].N-searchDim;i<=nd->nuclData[nucl].N+searchDim;i++)
@@ -435,10 +435,10 @@ void findLevelInRegion(double energy, int nucl, int searchDim, ndata *nd){
 				nind=NZToNuclIndex(i,j,nd);
 				if(nind>=0)
 					for(k=0;k<nd->nuclData[nind].numLevels;k++)
-						for(l=0;l<nd->nuclData[nind].levels[k].numGammas;l++)
-							if(fudgeNumbers(nd->nuclData[nind].levels[k].gamma_energies[l],energy,10.0))
-								if(!(fudgeNumbers(nd->nuclData[nind].levels[k].gamma_energies[l],energy,2.0)))
-								printf("%s: contains nearby gamma with energy %6.1f keV (lv#%2i).\n",nd->nuclData[nind].nuclName,nd->nuclData[nind].levels[k].gamma_energies[l],k+1);
+						for(l=0;l<nd->levels[nd->nuclData[nind].firstLevel + k].numGammas;l++)
+							if(fudgeNumbers(nd->levels[nd->nuclData[nind].firstLevel + k].gamma_energies[l],energy,10.0))
+								if(!(fudgeNumbers(nd->levels[nd->nuclData[nind].firstLevel + k].gamma_energies[l],energy,2.0)))
+								printf("%s: contains nearby gamma with energy %6.1f keV (lv#%2i).\n",nd->nuclData[nind].nuclName,nd->levels[nd->nuclData[nind].firstLevel + k].gamma_energies[l],k+1);
 			}
 }
 
@@ -544,9 +544,6 @@ void showLevelData(int nucl, ndata *nd, int numLevels){
 		printf("%i levels found.\n",nd->nuclData[nucl].numLevels);
 	else
 		printf("Showing the first %i levels.\n",numLevels);
-	
-	if((nd->nuclData[nucl].numLevels>=MAXLEVELSPERNUCL)||(numLevels>=MAXLEVELSPERNUCL))
-		printf("NOTE: level listing is truncated due to hitting the maximum size limit.  To increase the size limit, change the value of MAXLEVELSPERNUCL in 'levelup.h'.\n");
 
 	printf("\nS(n) = %.1f keV, S(p) = %.1f keV, Q(beta) = %.1f keV, Q(alpha) = %.1f keV\n",nd->nuclData[nucl].sn,nd->nuclData[nucl].sp,nd->nuclData[nucl].qbeta,nd->nuclData[nucl].qalpha);
 
@@ -555,32 +552,32 @@ void showLevelData(int nucl, ndata *nd, int numLevels){
 		for(i=0;i<nd->nuclData[nucl].numLevels;i++)
 			if((numLevels<=0)||(i<numLevels))
 				{
-					if(nd->nuclData[nucl].levels[i].numGammas>0)
+					if(nd->levels[nd->nuclData[nucl].firstLevel + i].numGammas>0)
 						{
-							finalEnergy=nd->nuclData[nucl].levels[i].energy-nd->nuclData[nucl].levels[i].gamma_energies[0];
+							finalEnergy=nd->levels[nd->nuclData[nucl].firstLevel + i].energy-nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[0];
 							if(finalEnergy<0)  
 								finalEnergy=0.;
-							fillSpinPar(&nd->nuclData[nucl].levels[i],spstr);
-							fillLifetime(&nd->nuclData[nucl].levels[i],ltstr);
-							if(nd->nuclData[nucl].levels[i].gamma_intensities[0]>0)
-								printf("%13.3f %13.3f %10.1f %10.3f %16s %14s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],nd->nuclData[nucl].levels[i].gamma_intensities[0],finalEnergy,spstr,ltstr);
+							fillSpinPar(&nd->levels[nd->nuclData[nucl].firstLevel + i],spstr);
+							fillLifetime(&nd->levels[nd->nuclData[nucl].firstLevel + i],ltstr);
+							if(nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_intensities[0]>0)
+								printf("%13.3f %13.3f %10.1f %10.3f %16s %14s\n",nd->levels[nd->nuclData[nucl].firstLevel + i].energy,nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[0],nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_intensities[0],finalEnergy,spstr,ltstr);
 							else
-								printf("%13.3f %13.3f    unknown %10.3f %16s %14s\n",nd->nuclData[nucl].levels[i].energy,nd->nuclData[nucl].levels[i].gamma_energies[0],finalEnergy,spstr,ltstr);
+								printf("%13.3f %13.3f    unknown %10.3f %16s %14s\n",nd->levels[nd->nuclData[nucl].firstLevel + i].energy,nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[0],finalEnergy,spstr,ltstr);
 						}
 					else
 						{
-							fillSpinPar(&nd->nuclData[nucl].levels[i],spstr);
-							fillLifetime(&nd->nuclData[nucl].levels[i],ltstr);
-							printf("%13.3f                                     %16s %14s\n",nd->nuclData[nucl].levels[i].energy,spstr,ltstr);
+							fillSpinPar(&nd->levels[nd->nuclData[nucl].firstLevel + i],spstr);
+							fillLifetime(&nd->levels[nd->nuclData[nucl].firstLevel + i],ltstr);
+							printf("%13.3f                                     %16s %14s\n",nd->levels[nd->nuclData[nucl].firstLevel + i].energy,spstr,ltstr);
 						}
-					for(j=1;j<nd->nuclData[nucl].levels[i].numGammas;j++)
+					for(j=1;j<nd->levels[nd->nuclData[nucl].firstLevel + i].numGammas;j++)
 						{
-							finalEnergy=nd->nuclData[nucl].levels[i].energy-nd->nuclData[nucl].levels[i].gamma_energies[j];
+							finalEnergy=nd->levels[nd->nuclData[nucl].firstLevel + i].energy-nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[j];
 							if(finalEnergy<0)  finalEnergy=0.;
-							if(nd->nuclData[nucl].levels[i].gamma_intensities[j]>0)
-								printf("              %13.3f %10.1f %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],nd->nuclData[nucl].levels[i].gamma_intensities[j],finalEnergy);
+							if(nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_intensities[j]>0)
+								printf("              %13.3f %10.1f %10.3f\n",nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[j],nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_intensities[j],finalEnergy);
 							else
-								printf("              %13.3f    unknown %10.3f\n",nd->nuclData[nucl].levels[i].gamma_energies[j],finalEnergy);
+								printf("              %13.3f    unknown %10.3f\n",nd->levels[nd->nuclData[nucl].firstLevel + i].gamma_energies[j],finalEnergy);
 						}
 				}
 }
@@ -623,7 +620,7 @@ void rebuildDatabase(ndata *nd, FILE *db){
 		strcat(fileName,str);
 		readENSDFFile(fileName,nd); //grab data from the ENSDF file (see parse_ENSDF.c)
 	}
-	printf("Data imported for %i nuclei.\n",nd->numNucl);
+	printf("Data imported for %i nuclei, containing %u levels.\n",nd->numNucl,nd->numLvls);
 	printf("Generating cascade data.\n");
 	generateCascadeData(nd);
 	

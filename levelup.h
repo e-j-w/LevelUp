@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <stdint.h> //allows uint8_t and similiar types
 
 //spectrum data file specs
 #define S32K 32768
@@ -19,8 +20,8 @@
 #define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXSPPERLEVEL 3
-#define MAXLEVELSPERNUCL 300
 #define MAXNUMNUCL 3500
+#define MAXNUMLVLS 200000
 
 //structures
 typedef struct
@@ -60,22 +61,24 @@ typedef struct
 
 typedef struct
 {
-  char nuclName[10]; //name of the nucleus, eg. '68SE'
-  short N; //neutrons in nucleus
-  short Z; //protons in nucleus
+  char nuclName[10]; //name of the nuclide, eg. '68SE'
+  short N; //neutrons in nuclide
+  short Z; //protons in nuclide
   float qbeta, qalpha;
   float sp, sn; //proton and neutron separation energies
-  short numLevels; //number of excited levels in this nucleus
-  level levels[MAXLEVELSPERNUCL]; //levels belonging to the nucleus
-  short numCascades; //number of cascades stored for this nucleus
-  gamma_cascade cascades[MAXCASCDESPERNUCL]; //cascades belonging to the nucleus
-}nucl; //gamma data for a given nucleus
+  uint32_t firstLevel; //index of first level in this nuclide
+  uint16_t numLevels; //number of excited levels in this nuclide
+  short numCascades; //number of cascades stored for this nuclide
+  gamma_cascade cascades[MAXCASCDESPERNUCL]; //cascades belonging to the nuclide
+}nucl; //gamma data for a given nuclide
 
 typedef struct
 {
-  short numNucl; //number of nuclei for which data is stored
-  nucl nuclData[MAXNUMNUCL];
-}ndata; //complete set of gamma data for all nuclei
+  int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
+  uint32_t numLvls; //number of levels across all nuclides
+  nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
+  level levels[MAXNUMLVLS]; //levels belonging to nuclides
+}ndata; //complete set of gamma data for all nuclides
 
 
 typedef struct
