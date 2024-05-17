@@ -22,6 +22,7 @@
 #define MAXSPPERLEVEL 3
 #define MAXNUMNUCL 3500
 #define MAXNUMLVLS 200000
+#define MAXNUMTRAN 300000
 
 //structures
 typedef struct
@@ -47,16 +48,22 @@ typedef struct
 
 typedef struct
 {
+  uint8_t type; //0=gamma, other values for beta, alpha, etc.
+  float energy; //transition energy, in keV
+  float intensity; //relative intensity
+}transition; //a transition between levels
+
+typedef struct
+{
   float energy; //level energy in keV
   short energyerr; //energy uncertainty value
   float lifetime; //level lifetime (-1 if unknown)
-  short lifetimeUnit; //units for level lifetime (-1=stable,0=years,1=days,2=hours,3=minutes,4=s,5=ms,6=us,7=ns,8=ps,9=fs,10=as,11=eV,12=keV,13=MeV)
+  int8_t lifetimeUnit; //units for level lifetime (-1=stable,0=years,1=days,2=hours,3=minutes,4=s,5=ms,6=us,7=ns,8=ps,9=fs,10=as,11=eV,12=keV,13=MeV)
   short lifetimeErr; //lifetime uncertainty value
   short numspinparvals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
-  short numGammas; //number of gamma rays in this level
-  float gamma_energies[MAXGAMMASPERLEVEL];
-  float gamma_intensities[MAXGAMMASPERLEVEL];
+  short numTransitions; //number of gamma rays in this level
+  uint32_t firstTransition; //index of first transition from this level
 }level; //an individual excited level
 
 typedef struct
@@ -76,8 +83,10 @@ typedef struct
 {
   int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint32_t numLvls; //number of levels across all nuclides
+  uint32_t numTran; //number of transitions across all levels
   nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
+  transition transitions[MAXNUMTRAN]; //transitions between levels
 }ndata; //complete set of gamma data for all nuclides
 
 

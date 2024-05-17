@@ -68,9 +68,9 @@ void generateCascadeData(ndata *nd)
 	  		nd->nuclData[i].numCascades=0;//initialize properly
 				if(nd->nuclData[i].numLevels>=0) //check that indices are valid
 					for(j=0;j<nd->nuclData[i].numLevels;j++)
-					  for(k=0;k<nd->levels[nd->nuclData[i].firstLevel + j].numGammas;k++){
+					  for(k=0;k<nd->levels[nd->nuclData[i].firstLevel + j].numTransitions;k++){
 							//check whether the level decays to another level
-							double trialLevelE = nd->levels[nd->nuclData[i].firstLevel + j].energy - nd->levels[nd->nuclData[i].firstLevel + j].gamma_energies[k];
+							double trialLevelE = nd->levels[nd->nuclData[i].firstLevel + j].energy - nd->transitions[nd->levels[nd->nuclData[i].firstLevel + j].firstTransition + k].energy;
 							for(l=0;l<j;l++)
 								if(fudgeNumbers(trialLevelE, nd->levels[nd->nuclData[i].firstLevel + l].energy, 2.)==1)
 									{
@@ -672,6 +672,7 @@ void initialize_database(ndata * nd)
 	
 	nd->numNucl = -1;
 	nd->numLvls = 0;
+	nd->numTran = 0;
 	for(i=0;i<MAXNUMNUCL;i++){
 		nd->nuclData[i].numLevels = 0;
 	}
@@ -805,17 +806,20 @@ void readENSDFFile(const char * fileName, ndata * nd){
 				if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
 					if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
 						if(subSec==0)//adopted gamma levels subsection
-							if(nd->levels[nd->numLvls-1].numGammas<MAXGAMMASPERLEVEL)
+							if(nd->levels[nd->numLvls-1].numTransitions<MAXGAMMASPERLEVEL)
 								if(strcmp(typebuff," G")==0){
 									//parse the gamma intensity
 									char ibuff[8];
 									memcpy(ibuff, &line[21], 7);
 									ibuff[7] = '\0';
-										
-									nd->levels[nd->numLvls-1].gamma_energies[nd->levels[nd->numLvls-1].numGammas]=atof(ebuff);
+									if(nd->levels[nd->numLvls-1].numTransitions == 0){
+										nd->levels[nd->numLvls-1].firstTransition = nd->numTran;
+									}
+									nd->transitions[nd->levels[nd->numLvls-1].firstTransition + nd->levels[nd->numLvls-1].numTransitions].energy=atof(ebuff);
 									//printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
-									nd->levels[nd->numLvls-1].gamma_intensities[nd->levels[nd->numLvls-1].numGammas]=atof(ibuff);
-									nd->levels[nd->numLvls-1].numGammas++;
+									nd->transitions[nd->levels[nd->numLvls-1].firstTransition + nd->levels[nd->numLvls-1].numTransitions].intensity=atof(ibuff);
+									nd->levels[nd->numLvls-1].numTransitions++;
+									nd->numTran++;
 										
 								}
 			//add Q-values and separation energies
